@@ -1,6 +1,6 @@
 {
 "companyName": "DefaultCompany",
-"productName": "KateWarehouse",
+"productName": "UserStudy",
 "productVersion": "0.1",
 "dataUrl": "ReducedWH.data.unityweb",
 "wasmCodeUrl": "ReducedWH.wasm.code.unityweb",
