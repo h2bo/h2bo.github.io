@@ -85,7 +85,7 @@ async function init(e) {
 		console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
 	
 		if(device.kind === "audioinput")
-			continue;
+			return;
 		
 		
 		if(countIndex == 1)
