@@ -15,9 +15,12 @@ const constraints = window.constraints = {
 
 function handleSuccess(stream) {
   const video = document.getElementById('gum1');
+  const video2 = document.getElementById('gum2');
+  
   const videoTracks = stream.getVideoTracks();
   console.log('Got stream with constraints:', constraints);
   console.log(`Using video device: ${videoTracks[0].label}`);
+  console.log(`other vidya device: ${videoTracks[1].label}`);
   window.stream = stream; // make variable available to browser console
   video.srcObject = stream;
 }
