@@ -9,8 +9,11 @@
 
 // Put variables in global scope to make them available to the browser console.
 const constraints = window.constraints = {
-  audio: false,
-  video: true
+  //audio: false,
+  //video: true
+  video: {
+	  deviceID: { exact: camera1Id}
+  }
 };
 
 function handleSuccess(stream) {
@@ -20,7 +23,7 @@ function handleSuccess(stream) {
   const videoTracks = stream.getVideoTracks();
   console.log('Got stream with constraints:', constraints);
   console.log(`Using video device: ${videoTracks[0].label}`);
-  console.log(`other vidya device: ${videoTracks[1].label}`);
+  //console.log(`other vidya device: ${videoTracks[1].label}`);
   window.stream = stream; // make variable available to browser console
   video.srcObject = stream;
 }
