@@ -9,13 +9,34 @@
 
 // Put variables in global scope to make them available to the browser console.
 const constraints = window.constraints = {
-  audio: false,
+  audio: true,
   video: true
 };
 
-function handleSuccess(stream) {
+function handleSuccess1(stream) {
   const video = document.getElementById('gum1');
-  const video2 = document.getElementById('gum2');
+  
+  const videoTracks = stream.getVideoTracks();
+  console.log('Got stream with constraints:', constraints);
+  console.log(`Using video device: ${videoTracks[0].label}`);
+  //console.log(`other vidya device: ${videoTracks[1].label}`);
+  window.stream = stream; // make variable available to browser console
+  video.srcObject = stream;
+}
+
+function handleSuccess2(stream) {
+  const video = document.getElementById('gum2');
+  
+  const videoTracks = stream.getVideoTracks();
+  console.log('Got stream with constraints:', constraints);
+  console.log(`Using video device: ${videoTracks[0].label}`);
+  //console.log(`other vidya device: ${videoTracks[1].label}`);
+  window.stream = stream; // make variable available to browser console
+  video.srcObject = stream;
+}
+
+function handleSuccess3(stream) {
+  const video = document.getElementById('gum3');
   
   const videoTracks = stream.getVideoTracks();
   console.log('Got stream with constraints:', constraints);
@@ -47,18 +68,47 @@ function errorMsg(msg, error) {
 
 async function init(e) {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    //const stream = await navigator.mediaDevices.getUserMedia(constraints);
+	var countIndex = 1;
+	var stream1;
+	var stream2;
+	var stream3;
 	
-navigator.mediaDevices.enumerateDevices()
-.then(function(devices) {
-  devices.forEach(function(device) {
-    console.log(device.kind + ": " + device.label +
-                " id = " + device.deviceId);
-  });
-})
 	
-    handleSuccess(stream);
+	navigator.mediaDevices.enumerateDevices()
+	.then(function(devices) {
+	devices.forEach(function(device) {
+		console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+	
+		if(countIndex == 1)
+		{
+			stream1 = navigator.mediaDevices.getUserMedia(
+				{
+					video: {deviceId: {exact: device.deviceId } }
+				}
+		);
+		}
+	
+		if(countIndex == 2)
+			stream2 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+	
+		if(countIndex == 3)
+			stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+	});
+	})
+	
+	
+	
+	
+	
+	
+    //handleSuccess(stream);
+	
+	handleSuccess1(stream1);
+	handleSuccess2(stream2);
+	handleSuccess3(stream3);
     e.target.disabled = true;
+	
   } catch (e) {
     handleError(e);
   }
