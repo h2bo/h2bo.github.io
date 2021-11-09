@@ -75,25 +75,28 @@ async function init(e) {
 	var stream3;
 	
 	
+	var device1;
+	var device2;
+	var device3;
+	
 	navigator.mediaDevices.enumerateDevices()
 	.then(function(devices) {
 	devices.forEach(function(device) {
 		console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
 	
+		if(device.kind === "audioinput")
+			continue;
+		
+		
 		if(countIndex == 1)
-		{
-			stream1 = navigator.mediaDevices.getUserMedia(
-				{
-					video: {deviceId: {exact: device.deviceId } }
-				}
-		);
-		}
+			device1 = device.deviceId;
 	
 		if(countIndex == 2)
-			stream2 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+			device2 = device.deviceId;
 	
 		if(countIndex == 3)
-			stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+			device3 = device.deviceId;
+			//stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
 		
 		countIndex++;
 		
@@ -119,4 +122,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
-document.getElementById("kevinStatus").innerHTML = 'Hello2';
+document.getElementById("kevinStatus").innerHTML = 'Hello3';
