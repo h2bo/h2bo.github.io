@@ -87,6 +87,8 @@ async function init(e) {
 		if(device.kind === "audioinput")
 			return;
 		
+		console.log("USING THIS: ");
+		
 		
 		if(countIndex == 1)
 			device1 = device.deviceId;
@@ -122,4 +124,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
-document.getElementById("kevinStatus").innerHTML = 'Hello3';
+document.getElementById("kevinStatus").innerHTML = 'Hello4';
