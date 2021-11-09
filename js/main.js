@@ -82,7 +82,7 @@ async function init(e) {
 	
 		if(countIndex == 1)
 		{
-			stream1 = navigator.mediaDevices.getUserMedia(
+			stream1 = await navigator.mediaDevices.getUserMedia(
 				{
 					video: {deviceId: {exact: device.deviceId } }
 				}
@@ -90,10 +90,10 @@ async function init(e) {
 		}
 	
 		if(countIndex == 2)
-			stream2 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+			stream2 = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
 	
 		if(countIndex == 3)
-			stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+			stream3 = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
 	});
 	})
 	
@@ -115,3 +115,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
+document.querySelector('#kevinStatus').innerHTML = "Hello";
