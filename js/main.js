@@ -115,4 +115,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
-document.querySelector('#kevinStatus').innerHTML = "Hello";
+document.getElementById("kevinStatus").innerHTML = 'Hello2';
