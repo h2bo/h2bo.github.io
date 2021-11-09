@@ -94,6 +94,10 @@ async function init(e) {
 	
 		if(countIndex == 3)
 			stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+		
+		countIndex++;
+		
+		
 	});
 	})
 	
@@ -115,4 +119,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
-//document.getElementById("kevinStatus").innerHTML = 'Hello2';
+document.getElementById("kevinStatus").innerHTML = 'Hello2';
