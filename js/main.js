@@ -108,7 +108,9 @@ async function init(e) {
 	
 	
 	
-	
+	stream1 = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device1}}});
+	stream2 = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device2}}});
+	stream3 = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device3}}});
 	
 	
     //handleSuccess(stream);
@@ -124,4 +126,4 @@ async function init(e) {
 }
 
 document.querySelector('#showVideo').addEventListener('click', e => init(e));
-document.getElementById("kevinStatus").innerHTML = 'Hello4';
+document.getElementById("kevinStatus").innerHTML = 'Hello11';
