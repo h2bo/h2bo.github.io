@@ -9,11 +9,8 @@
 
 // Put variables in global scope to make them available to the browser console.
 const constraints = window.constraints = {
-  //audio: false,
-  //video: true
-  video: {
-	  deviceID: { exact: camera1Id}
-  }
+  audio: false,
+  video: true
 };
 
 function handleSuccess(stream) {
