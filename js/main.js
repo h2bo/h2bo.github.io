@@ -48,6 +48,15 @@ function errorMsg(msg, error) {
 async function init(e) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
+	
+navigator.mediaDevices.enumerateDevices()
+.then(function(devices) {
+  devices.forEach(function(device) {
+    console.log(device.kind + ": " + device.label +
+                " id = " + device.deviceId);
+  });
+})
+	
     handleSuccess(stream);
     e.target.disabled = true;
   } catch (e) {
