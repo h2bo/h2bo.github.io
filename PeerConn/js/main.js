@@ -5,7 +5,14 @@ const myVideo = document.getElementById("myVid");
 const otherVideo = document.getElementById("otherVid");
 
 
-const servers = {'iceServers': [{'urls': 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'}]};
+const servers = {
+	'iceServers': [
+	{
+			'urls': ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302']
+	}
+	]
+};
+
 let pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
