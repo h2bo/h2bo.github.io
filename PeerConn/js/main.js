@@ -23,7 +23,7 @@ webcamButton.onclick = async() => {
 	localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
 	remoteStream = new MediaStream();
 	
-	localStream.getTracks().foreach(track => {
+	localStream.getTracks().forEach(track => {
 		pc.addTrack(track, localStream);
 	});
 	
