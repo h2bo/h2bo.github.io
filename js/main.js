@@ -13,6 +13,14 @@ const constraints = window.constraints = {
   video: true
 };
 
+
+const servers = {'iceServers': [{'urls': 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'}]};
+
+
+let pc = new RTCPeerConnection(servers);
+
+
+
 function handleSuccess1(stream) {
   const video = document.getElementById('gum1');
   

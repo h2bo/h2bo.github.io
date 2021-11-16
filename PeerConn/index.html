@@ -3,18 +3,23 @@
 <body>
 <p id="mainBody">Waiting for conn</p>
 
-	<button id="connectButton">Turn On</button>
-	<button id="disconnectButton">Turn Off</button>
+	<div id="container">
 	
-	<br/><br/>
 	
-	<label for="message">Enter a message:
-      <input type="text" name="message" id="message" placeholder="Message text" 
-              inputmode="latin" size=60 maxlength=120 disabled>
-    </label>
-    <button id="sendButton" name="sendButton" class="buttonright" disabled>
-      Send
-    </button>
+		<span>My Video:</span>
+		<video id="myVid" autoplay playsinline></video>
+		
+		<span>Other Video:</span>
+		<video id="otherVid" autoplay playsinline></video>
+		
+		
+		<button id="webcamButton">Start WebCam</button>
+		<span>Create call</span>
+		<button id="callButton" disabled>Call</button>
+		
+	
+	
+	</div>
 	
 	
 	
@@ -31,6 +36,9 @@
 <li>"stun3.l.google.com:19302"</li>
 <li>"stun4.l.google.com:19302"</li>
 </ul>
+
+
+<script src="js/main.js"></script>
 
 
 </body>
