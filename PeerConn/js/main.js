@@ -13,27 +13,49 @@ const servers = {
 	]
 };
 
-let pc = new RTCPeerConnection(servers);
-let localStream = null;
-let remoteStream = null;
+var pc = new RTCPeerConnection(servers);
+var localStream = null;
+var remoteStream = null;
+
+
+pc.onaddstream = function() {
+	console.log("stream was added");
+};
+
+pc.onicecandidate = function() {
+	console.log("ice candidate received");
+};
+
+pc.message = function() {
+	console.log("Message received");
+};
 
 
 
 webcamButton.onclick = async() => {
-	localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-	remoteStream = new MediaStream();
+	//local stream
 	
+	localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
 	localStream.getTracks().forEach(track => {
 		pc.addTrack(track, localStream);
 	});
 	
+	myVideo.srcObject = localStream;
+
+
+	
+	
+	
+	//remote stream
+	
+	/*	
 	pc.ontrack = event => {
 		event.streams[0].getTracks().forEach(track => {
 			remoteStream.addTrack(track);
 		});
 	};
-	
-	myVideo.srcObject = localStream;
+	*/
+	remoteStream = new MediaStream();
 	otherVideo.srcObject = remoteStream;
 	
 };

@@ -1,47 +1,22 @@
-<html>
-
-<body>
-<p id="mainBody">Waiting for conn</p>
-
-	<div id="container">
+<html lang = "en"> 
+   <head> 
+      <meta charset = "utf-8" /> 
+   </head>
 	
+   <body> 
 	
-		<span>My Video:</span><br/>
-		<video id="myVid" autoplay playsinline></video>
-		<br/><br/>
+      <div> 
+         <input type = "text" id = "loginInput" /> 
+         <button id = "loginBtn">Login</button> 
+      </div> 
+	
+      <div> 
+         <input type = "text" id = "otherUsernameInput" />
+         <button id = "connectToOtherUsernameBtn">Establish connection</button> 
+      </div> 
 		
-		<span>Other Video:</span><br/>
-		<video id="otherVid" autoplay playsinline></video>
+      <script src = "js/client.js"></script>
 		
-		
-		<button id="webcamButton">Start WebCam</button>
-		<span>Create call</span>
-		<button id="callButton" disabled>Call</button>
-		
+   </body>
 	
-	
-	</div>
-	
-	
-	
-	<div class="messagebox" id="receivebox">
-		<p>Messages received:</p>
-	</div>
-	
-	
-	
-<p> Possible stun servers:</p>
-<ul>
-<li>"stun1.l.google.com:19302"</li>
-<li>"stun2.l.google.com:19302"</li>
-<li>"stun3.l.google.com:19302"</li>
-<li>"stun4.l.google.com:19302"</li>
-</ul>
-
-
-<script src="js/main.js"></script>
-
-
-</body>
-
 </html>

@@ -1,0 +1,64 @@
+<html>
+
+<body>
+<p id="mainBody">Waiting for conn</p>
+<p> Left off here: https://www.tutorialspoint.com/webrtc/webrtc_rtcpeerconnection_apis.htm</p>
+
+<p id="instructions">Step 1: start a server using this command: "python3 -m http.server"</p>
+
+
+
+      <div> 
+         <input type = "text" id = "loginInput" /> 
+         <button id = "loginBtn">Login</button> 
+      </div> 
+	
+      <div> 
+         <input type = "text" id = "otherUsernameInput" />
+         <button id = "connectToOtherUsernameBtn">Establish connection</button> 
+      </div> 
+
+
+
+
+	<div id="container">	
+	
+		<span>My Video:</span><br/>
+		<video id="myVid" autoplay playsinline></video>
+		<br/><br/>
+		
+		<span>Other Video:</span><br/>
+		<video id="otherVid" autoplay playsinline></video>
+		
+		
+		<button id="webcamButton">Start WebCam</button>
+		<span>Create call</span>
+		<button id="callButton" disabled>Call</button>
+		
+	
+	
+	</div>
+	
+	
+	
+	<div class="messagebox" id="receivebox">
+		<p>Messages received:</p>
+	</div>
+	
+	
+	
+<p> Possible stun servers:</p>
+<ul>
+<li>"stun1.l.google.com:19302"</li>
+<li>"stun2.l.google.com:19302"</li>
+<li>"stun3.l.google.com:19302"</li>
+<li>"stun4.l.google.com:19302"</li>
+</ul>
+
+
+<script src="js/main.js"></script>
+
+
+</body>
+
+</html>
