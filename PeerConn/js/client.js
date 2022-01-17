@@ -1,5 +1,5 @@
 //var connection = new WebSocket('wss://server.saltyrtc.org:443'); 
-var connection = new WebSocket('ws://obscure-sierra-55073.herokuapp.com');
+var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 var name = ""; 
  
 var loginInput = document.querySelector('#loginInput'); 
