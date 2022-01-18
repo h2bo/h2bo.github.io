@@ -4,16 +4,35 @@
    </head>
 	
    <body> 
-	
-      <div> 
-         <input type = "text" id = "loginInput" /> 
-         <button id = "loginBtn">Login</button> 
-      </div> 
-	
-      <div> 
-         <input type = "text" id = "otherUsernameInput" />
-         <button id = "connectToOtherUsernameBtn">Establish connection</button> 
-      </div> 
+   
+   
+		<div id="loginPage">
+		
+		    <div> 
+				<input type="text" id="loginInput" /> 
+				<button id="loginBtn">Login</button> 
+			</div> 
+		
+		</div>
+   
+		
+		
+		
+		<div id="callPage" style="display:none">
+		
+			<p>Your login: <span id="userLogin" style="font-weight: bold"></span></p>
+		
+			<input type = "text" id = "otherUsernameInput" />
+			<button id = "connectToOtherUsernameBtn">Establish connection</button> 
+		</div>
+		
+		
+		<div id="videoPage" style="display: none">
+			<p>Your video:</p>
+			<video id="myVideo" autoplay></video>
+			<p>Their video:</p>
+			<video id="remoteVideo" autoplay></video>
+		</div>
 		
       <script src = "js/client.js"></script>
 		
