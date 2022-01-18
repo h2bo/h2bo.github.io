@@ -12,6 +12,7 @@ var videoPage = document.querySelector('#videoPage');
 var myVideo = document.querySelector('#myVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 var yourName = document.querySelector('#userLogin');
+var statusText = document.querySelector('#status');
 
 var connectedUser, myConnection, theStream;
   
@@ -199,6 +200,7 @@ function onLogin(success) {
   
 connection.onopen = function () { 
    console.log("Connected to the signalling server"); 
+   statusText.innerHTML = "Connected to the signalling server!";
 };
   
   
