@@ -155,7 +155,7 @@ function onLogin(success) {
       //********************** 
 		
       //getting local video stream 
-      navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) { 
+      navigator.getUserMedia({ video: true, audio: false }, function (myStream) { 
          theStream = myStream; 
 			
          //displaying local video stream on the page 
@@ -163,7 +163,11 @@ function onLogin(success) {
 			
          //using Google public stun server 
          var configuration = { 
-            "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+            "iceServers": 
+			[
+				{ 'urls': 'stun:stun1.l.google.com:19302, stun:stun2.l.google.com:19302, stun:stun3.l.google.com:19302, stun:stun4.l.google.com:19302'}
+				
+			]
          }; 
 			
          myConnection = new RTCPeerConnection(configuration); 
