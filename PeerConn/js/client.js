@@ -155,7 +155,7 @@ function onLogin(success) {
       //********************** 
 		
       //getting local video stream 
-      navigator.getUserMedia({ video: true, audio: false }, function (myStream) { 
+      navigator.getUserMedia({ video: true, audio: true	  }, function (myStream) { 
          theStream = myStream; 
 			
          //displaying local video stream on the page 
