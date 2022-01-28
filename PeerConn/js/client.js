@@ -28,6 +28,14 @@ var connectedUser, myConnection, theStream;
 var myStreamingDevices = [];
 var deviceCounter = 0;
 
+
+
+////TODO: use this to generate video tags
+var receivedTracks = 0;
+
+
+
+
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
 	devices.forEach(function(device) 
@@ -179,8 +187,15 @@ async function onLogin(success) {
          }; 
 		 
 		 
-		 myConnection = new RTCPeerConnection(configuration); 
+		myConnection = new RTCPeerConnection(configuration); 
 
+		myConnection.addEventListener("track", e => {
+			console.log("Bruh");
+			console.log(e);
+			var ms = new MediaStream();
+			ms.addTrack(e.track);
+			remoteVideo.srcObject = ms;
+		}, false);
 
 			
          //when a remote user adds stream to the peer connection, we display it 
@@ -212,15 +227,22 @@ async function onLogin(success) {
 	{
 		
 		 //getting local video stream 
-		 await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}}).then(function(myStream){
-      //navigator.getUserMedia({ video: true, audio: true	  }, function (myStream) { 
-         //theStream = myStream;
 		 
-		 console.log(myStream);
-		 
+		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
 		 
 		 var vidyaID = "video"+i;
-		 document.querySelector('#'+vidyaID).srcObject = myStream;
+		 document.querySelector('#'+vidyaID).srcObject = gumStream;
+		 
+		 for(const track of gumStream.getTracks())
+		 {
+			 myConnection.addTrack(track);
+		 }
+		 
+		 //await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}}).then(function(myStream){
+      //navigator.getUserMedia({ video: true, audio: true	  }, function (myStream) { 
+         //theStream = myStream;		 
+		 
+		 
 		 
 			
          //displaying local video stream on the page 
@@ -230,9 +252,9 @@ async function onLogin(success) {
 		         // setup stream listening 
          //myConnection.addStream(myStream); 
          
-      }, function (error) { 
-         console.log(error); 
-      }); 
+      //}, function (error) { 
+         //console.log(error); 
+      //}); 
 	}
 		
 
