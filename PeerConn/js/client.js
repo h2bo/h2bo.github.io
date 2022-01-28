@@ -13,17 +13,52 @@ var myVideo = document.querySelector('#myVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 var yourName = document.querySelector('#userLogin');
 var statusText = document.querySelector('#status');
+var videosContainer = document.querySelector('#videosContainer');
 
 var connectedUser, myConnection, theStream;
-  
+
+
+
+
+
+///////////////////////////////////////////////////////////////
+//Collect all of the streaming cameras that are found.
+//This doesn't get the media; it just checks what is connected.
+///////////////////////////////////////////////////////////////
+var myStreamingDevices = [];
+var deviceCounter = 0;
+
+navigator.mediaDevices.enumerateDevices().then(function(devices) 
+{
+	devices.forEach(function(device) 
+	{			
+		if(device.kind === "videoinput")
+		{
+			console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+			
+			myStreamingDevices[deviceCounter] = device.deviceId;
+			deviceCounter++;
+		}
+	});
+	
+	console.log("We have this many devices: " + myStreamingDevices.length);
+	
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		console.log(myStreamingDevices[i]);
+	}
+})
+
+
+
+
+
+
+
 const constraints = window.constraints = {
   audio: false,
   video: true
-};  
-  
-  
-//const servers = {'iceServers': [{'urls': 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'}]};
-  
+};
   
   
   
@@ -55,8 +90,6 @@ connectToOtherUsernameBtn.addEventListener("click", function () {
 	callPage.style.display = "none";
 	videoPage.style.display = "inline";
 	
-	//initVideo();
-  
   
    var otherUsername = otherUsernameInput.value;
    connectedUser = otherUsername;
@@ -78,28 +111,6 @@ connectToOtherUsernameBtn.addEventListener("click", function () {
       }); 
    } 
 });
-
-async function initVideo(){
-	
-	var stream1 = await navigator.mediaDevices.getUserMedia(constraints);
-	showOwnVideo(stream1);
-}
-  
-  
-function showOwnVideo(stream) {
-  const video = myVideo;
-  
-  const videoTracks = stream.getVideoTracks();
-  console.log('Got stream with constraints:', constraints);
-  console.log(`Using video device: ${videoTracks[0].label}`);
-  window.stream = stream; // make variable available to browser console
-  video.srcObject = stream;
-}
-  
-
-function showRemoteVideo(stream) {
-	//todo... when the other user shows their video
-}
   
   
   
@@ -143,24 +154,18 @@ connection.onmessage = function (message) {
 
 
 //when a user logs in 
-function onLogin(success) { 
+async function onLogin(success) { 
+
+
 
    if (success === false) { 
       alert("oops...try a different username"); 
-   } else { 
-      //creating our RTCPeerConnection object 
-		
-      //********************** 
-      //Starting a peer connection 
-      //********************** 
-		
-      //getting local video stream 
-      navigator.getUserMedia({ video: true, audio: true	  }, function (myStream) { 
-         theStream = myStream; 
-			
-         //displaying local video stream on the page 
-         myVideo.srcObject = theStream;
-			
+   } 
+   
+   else 
+   { 
+
+
          //using Google public stun server 
          var configuration = { 
             "iceServers": 
@@ -172,17 +177,18 @@ function onLogin(success) {
 				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
 			]
          }; 
-			
-         myConnection = new RTCPeerConnection(configuration); 
-			
-         // setup stream listening 
-         myConnection.addStream(theStream); 
+		 
+		 
+		 myConnection = new RTCPeerConnection(configuration); 
+
+
 			
          //when a remote user adds stream to the peer connection, we display it 
          myConnection.onaddstream = function (e) { 
             remoteVideo.srcObject = e.stream;
+			console.log("Bruh");
          };
-			
+
          // Setup ice handling 
          myConnection.onicecandidate = function (event) { 
             if (event.candidate) { 
@@ -191,13 +197,63 @@ function onLogin(success) {
                   candidate: event.candidate 
                }); 
             } 
-         };  
+         };  	
+
+
+
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		var vidyaID = "video"+i;
+		 console.log("Vidya id: " + vidyaID);
+		 videosContainer.innerHTML += '<video id="'+vidyaID+'" muted autoplay></video>';
+	}
+	
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		
+		 //getting local video stream 
+		 await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}}).then(function(myStream){
+      //navigator.getUserMedia({ video: true, audio: true	  }, function (myStream) { 
+         //theStream = myStream;
+		 
+		 console.log(myStream);
+		 
+		 
+		 var vidyaID = "video"+i;
+		 document.querySelector('#'+vidyaID).srcObject = myStream;
+		 
 			
+         //displaying local video stream on the page 
+         //myVideo.srcObject = theStream;
+			
+
+		         // setup stream listening 
+         //myConnection.addStream(myStream); 
+         
       }, function (error) { 
          console.log(error); 
       }); 
+	}
+		
+
+
    } 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   
   
@@ -301,6 +357,8 @@ function onCandidate(candidate) {
 
 //creating data channel 
 function openDataChannel() { 
+
+console.log("Open Data Channel fired");
 
    var dataChannelOptions = { 
       reliable:true 

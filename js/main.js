@@ -87,31 +87,30 @@ async function init(e) {
 	var device2;
 	var device3;
 	
-	navigator.mediaDevices.enumerateDevices()
-	.then(function(devices) {
-	devices.forEach(function(device) {
-		console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+	navigator.mediaDevices.enumerateDevices().then(function(devices) 
+	{
+		devices.forEach(function(device) 
+		{
+			console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
 	
-		if(device.kind === "audioinput")
-			return;
+			if(device.kind === "audioinput")
+				return;
 		
-		console.log("USING THIS: ");
+			console.log("USING THIS: ");
 		
-		
-		if(countIndex == 1)
-			device1 = device.deviceId;
+			if(countIndex == 1)
+				device1 = device.deviceId;
 	
-		if(countIndex == 2)
-			device2 = device.deviceId;
+			if(countIndex == 2)
+				device2 = device.deviceId;
 	
-		if(countIndex == 3)
-			device3 = device.deviceId;
-			//stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
+			if(countIndex == 3)
+				device3 = device.deviceId;
+				//stream3 = navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: device.deviceId}}});
 		
-		countIndex++;
-		
-		
-	});
+			countIndex++;
+			
+		});
 	})
 	
 	
