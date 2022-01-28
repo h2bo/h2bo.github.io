@@ -19,6 +19,7 @@ var remoteVideosContainer = document.querySelector('#remoteVideosContainer');
 var connectedUser, myConnection, theStream;
 
 
+console.log(Date.now());
 
 
 
@@ -158,17 +159,22 @@ connection.onmessage = function (message) {
 
 
 
-async function receiveVideo(e){
+function receiveVideo(e){
 	
-	remoteVideosContainer.innerHTML += '<video id="remote'+receivedTracks+'" muted autoplay></video>';
+	var tempThing = "id"+Date.now();
+	
+	console.log(tempThing);
+	
+	remoteVideosContainer.innerHTML += '<video id="'+tempThing+'" muted autoplay></video>';
+	
+	console.log(document.querySelector('#'+tempThing));
+	
+	setTimeout(function(){document.querySelector('#'+tempThing).srcObject = ms;}, 10000);
 	
 	var ms = new MediaStream();
 	ms.addTrack(e.track);
 	
-	document.querySelector('#remote'+receivedTracks).srcObject = ms;
-	//remoteVideo.srcObject = ms;
 	
-	receivedTracks++;
 }
 
 
@@ -206,19 +212,15 @@ async function onLogin(success) {
 		 
 		myConnection = new RTCPeerConnection(configuration); 
 
-		myConnection.addEventListener("track", e => receiveVideo(e).then({
-			
-			
-			
-		}), false);
+		myConnection.addEventListener("track", e => receiveVideo(e), false);
 
 			
          //when a remote user adds stream to the peer connection, we display it 
-         myConnection.onaddstream = function (e) {  
-		 console.log("giggity");
+         //myConnection.onaddstream = function (e) {  
+		 //console.log("giggity");
             //remoteVideo.srcObject = e.stream;
-			console.log("Bruh");
-		 };
+			//console.log("Bruh");
+		 //};
 
          // Setup ice handling 
          myConnection.onicecandidate = function (event) { 
