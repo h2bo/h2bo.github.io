@@ -101,6 +101,23 @@ function TryCall()
 	}
 }
   
+  
+  
+  
+  
+  
+  
+function receiveAudio(e)
+{
+	console.log("received track!!");
+	console.log(e);
+	
+	var ms = new MediaStream();
+	ms.addTrack(e.track);
+	
+	document.querySelector('#viewerAudio').srcObject = ms;
+	document.querySelector('#viewerAudio').play();
+}
 
 
 
@@ -130,6 +147,7 @@ async function onLogin(success) {
          }; 
 		 
 		myConnection = new RTCPeerConnection(configuration); 
+		myConnection.addEventListener("track", e => receiveAudio(e), false);
 
          // Setup ice handling 
          myConnection.onicecandidate = function (event) { 

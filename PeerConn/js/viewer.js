@@ -25,6 +25,7 @@ var receivedVideoTracks = [];
 var receivedAudioTrack;
 var currentPlayingVideo = 0;
 var ms;
+var myAudioDevice;
 
 nextVideo.addEventListener("click", function()
 {
@@ -53,11 +54,17 @@ prevVideo.addEventListener("click", function()
 function initPrimaryVideo()
 {
 	ms = new MediaStream();
+	
+	try{
 	ms.addTrack(receivedVideoTracks[0]);
 	ms.addTrack(receivedAudioTrack);
 	
 	primaryVid.srcObject = ms;
 	primaryVid.play();
+	}
+	catch(e){
+		console.log(e);
+	}
 }
 
 
@@ -69,7 +76,7 @@ function receiveVideo(e){
 	if(e.track.kind === "audio")
 	{
 		receivedAudioTrack = e.track;
-		initPrimaryVideo();
+		
 	}
 	else
 	{
@@ -78,6 +85,7 @@ function receiveVideo(e){
 	}
 	
 	document.querySelector('#connectStatus').style= "display: none";
+	initPrimaryVideo();
 }
 
 
@@ -123,7 +131,11 @@ async function onLogin(success) {
             } 
          };
 		 
-		
+		const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+		for(const track of audioStream.getTracks())
+		{
+			myConnection.addTrack(track);
+		}
 		
    } 
 };
@@ -274,3 +286,30 @@ connectToOtherUsernameBtn.addEventListener("click", function () {
    } 
 });
 */
+
+
+
+
+
+
+
+
+
+
+
+
+navigator.mediaDevices.enumerateDevices().then(function(devices) 
+{
+	devices.forEach(function(device) 
+	{			
+		if(device.kind === "audioinput")
+		{
+			
+			if(device.label.includes("USB"))
+			{
+				console.log("Potential audio: " + device.deviceId + " " + device.label);
+				myAudioDevice = device;
+			}
+		}
+	});
+})
