@@ -54,8 +54,7 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 function DoOneCall()
 {
 	
-		myConnection.createOffer(function (offer) { 
-         console.log(); 
+		myConnection.createOffer(function (offer) {
 			
          send({ 
             type: "offer", 
@@ -84,10 +83,10 @@ function TryCall()
 	console.log(dummy);
 	console.log(keepCalling);
 	
-	if(dummy < 10 && keepCalling)
+	if(keepCalling)
 	{
 		console.log("Trying a call");
-		setTimeout(function(){DoOneCall()}, 1000);
+		setTimeout(function(){DoOneCall(); TryCall()}, 2000);
 		console.log("Attempt complete");
 	}
 }
