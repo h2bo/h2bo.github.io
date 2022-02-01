@@ -39,6 +39,8 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 			myStreamingDevices[deviceCounter] = device.deviceId;
 			deviceCounter++;
 		}
+		else if(device.kind === "audioinput")
+			console.log("Potential audio: " + device.deviceId + " " + device.label);
 	});
 	
 	//console.log("We have this many devices: " + myStreamingDevices.length);
@@ -47,7 +49,10 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 	{
 		//console.log(myStreamingDevices[i]);
 	}
-})  
+})
+
+
+
   
   
   

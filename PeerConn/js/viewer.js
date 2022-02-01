@@ -78,6 +78,9 @@ function receiveVideo(e){
 	console.log(receivedVideoTracks);
 	
 	initPrimaryVideo(ms);
+	
+	
+	document.querySelector('#connectStatus').style= "display: none";
 }
 
 
@@ -247,7 +250,7 @@ function DoViewerLogin()
    //loginPage.style.display = "none";
    //yourName.innerHTML = loginInput.value;
    console.log("Now waiting for video stream");
-   statusText.innerHTML = "Connected to the signalling server, and awaiting the video stream!";
+   statusText.innerHTML = "Connected to the signalling server, and waiting for a stream.  Please wait....";
 }
 
 /*

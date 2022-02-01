@@ -1,59 +1,19 @@
 <html lang = "en"> 
    <head> 
       <meta charset = "utf-8" /> 
+	  <link rel="stylesheet" href="css/viewer.css">
    </head>
 	
-   <body> 
-   
-	<p id="status">Attempting to connect....</p>
-   
-		<!--
-		<div id="loginPage">
-		
-		    <div>
-				<input type="text" id="loginInput" /> 
-				<button id="loginBtn">Login</button> 
-			</div> 
-		
+   <body>
+		<div id="connectStatus">
+		<p id="status">Attempting to connect....</p>
 		</div>
-   
-		
-		
-		
-		<div id="callPage" style="display:none">
-		
-			<p>Your login: <span id="userLogin" style="font-weight: bold"></span></p>
-		
-			<input type = "text" id = "otherUsernameInput" />
-			<button id = "connectToOtherUsernameBtn">Establish connection</button> 
+		<div id="videoPage">
+			<button id="prevVideo" class="navButton"> < </button>
+			<button id="nextVideo" class="navButton"> > </button>
+			<video id="primaryVid" autoplay></video>
 		</div>
-		-->
-		
-		
-		<div id="videoPage" style="display: inline">
-			<video id="primaryVid" autoplay style="border: 1px black solid"></video>
-			<br/>
-			<button id="prevVideo"> < </button>
-			<button id="nextVideo"> > </button>
-			
-			<!--
-			<p>Your video(s):</p>
-			
-			<div id="videosContainer"></div>
-			-->
-			<!--<video id="video0" autoplay muted></video>
-			<video id="video1" autoplay muted></video>-->
-			
-			
-			<!--<video id="myVideo" autoplay muted></video>-->
-			<!--<p>Their video(s):</p>-->
-			
-			<div id="remoteVideosContainer"></div>
-			<!--<video id="remoteVideo" autoplay></video>-->
-		</div>
-		
-      <script src = "js/viewer.js"></script>
-		
+      <script src="js/viewer.js"></script>
    </body>
 	
 </html>
