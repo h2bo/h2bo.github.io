@@ -25,6 +25,7 @@ var partnerName;
 ///////////////////////////////////////////////////////////////
 var myStreamingDevices = [];
 var deviceCounter = 0;
+var myAudioDevice;
 
 
 var dummy = 0;
@@ -40,7 +41,11 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 			deviceCounter++;
 		}
 		else if(device.kind === "audioinput")
+		{
 			console.log("Potential audio: " + device.deviceId + " " + device.label);
+			if(device.label.includes("USB"))
+				myAudioDevice = device;
+		}
 	});
 	
 	//console.log("We have this many devices: " + myStreamingDevices.length);
@@ -155,6 +160,12 @@ async function onLogin(success) {
 		 {
 			 myConnection.addTrack(track);
 		 }
+	}
+	
+	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+	for(const track of audioStream.getTracks())
+	{
+		myConnection.addTrack(track);
 	}
 	
 	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";

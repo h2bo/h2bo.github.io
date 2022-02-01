@@ -20,41 +20,42 @@ var nextVideo = document.querySelector('#nextVideo');
 
 var connectedUser, myConnection, theStream;
 
-
-
-var receivedVideoTracks = [];
 var qtyReceivedTracks = 0;
-
+var receivedVideoTracks = [];
+var receivedAudioTrack;
 var currentPlayingVideo = 0;
-
+var ms;
 
 nextVideo.addEventListener("click", function()
 {
+	var allVidTracks = ms.getVideoTracks();	
+	ms.removeTrack(allVidTracks[0]);
+	
 	currentPlayingVideo++;
 	if(currentPlayingVideo >= qtyReceivedTracks)
 		currentPlayingVideo = 0;
 	
-	primaryVid.srcObject = receivedVideoTracks[currentPlayingVideo];
-	primaryVid.play();
+	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
 });
 
 prevVideo.addEventListener("click", function()
 {
+	var allVidTracks = ms.getVideoTracks();	
+	ms.removeTrack(allVidTracks[0]);
+	
 	currentPlayingVideo--;
 	if(currentPlayingVideo < 0)
 		currentPlayingVideo = (qtyReceivedTracks - 1);
 	
-	primaryVid.srcObject = receivedVideoTracks[currentPlayingVideo];
-	primaryVid.play();	
+	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
 });
 
-
-
-
-
-
-function initPrimaryVideo(ms)
+function initPrimaryVideo()
 {
+	ms = new MediaStream();
+	ms.addTrack(receivedVideoTracks[0]);
+	ms.addTrack(receivedAudioTrack);
+	
 	primaryVid.srcObject = ms;
 	primaryVid.play();
 }
@@ -63,22 +64,18 @@ function initPrimaryVideo(ms)
 
 
 function receiveVideo(e){
-	console.log("Received track");
-	//var tempThing = "id"+Date.now();
-	//remoteVideosContainer.innerHTML += '<video id="'+tempThing+'" muted autoplay></video>';
+	console.log(e);
 	
-	//setTimeout(function(){document.querySelector('#'+tempThing).srcObject = ms;}, 1000);
-	
-	var ms = new MediaStream();
-	ms.addTrack(e.track);
-	
-	receivedVideoTracks[qtyReceivedTracks] = ms;
-	qtyReceivedTracks++;
-	
-	console.log(receivedVideoTracks);
-	
-	initPrimaryVideo(ms);
-	
+	if(e.track.kind === "audio")
+	{
+		receivedAudioTrack = e.track;
+		initPrimaryVideo();
+	}
+	else
+	{
+		receivedVideoTracks[qtyReceivedTracks] = e.track;
+		qtyReceivedTracks++;
+	}
 	
 	document.querySelector('#connectStatus').style= "display: none";
 }
@@ -246,9 +243,6 @@ function DoViewerLogin()
       }); 
    }
    
-   //callPage.style.display = "inline";
-   //loginPage.style.display = "none";
-   //yourName.innerHTML = loginInput.value;
    console.log("Now waiting for video stream");
    statusText.innerHTML = "Connected to the signalling server, and waiting for a stream.  Please wait....";
 }
