@@ -255,7 +255,7 @@ connection.onerror = function (err) {
 
 // Alias for sending messages in JSON format 
 function send(message) { 
-
+///////////this function needs to change, to know who we are messaging
    if (connectedUser) { 
       message.name = connectedUser; 
    } 
