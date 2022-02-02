@@ -190,10 +190,10 @@ connection.onmessage = function (message) {
 			onOffer(data.offer, data.name); 
 			break; 
 		case "answer": 
-			onAnswer(data.answer); 
+			onAnswer(data.answer, data.name); 
 			break; 
 		case "candidate": 
-			onCandidate(data.candidate); 
+			onCandidate(data.candidate, data.name); 
 			break; 
 		default: 
 			break; 
@@ -245,15 +245,15 @@ function onOffer(offer, name) {
 }
 
 //when another user answers to our offer 
-function onAnswer(answer) { 
+function onAnswer(answer, name) { 
    myConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
-   console.log("Got an Answer");
+   console.log("Got an Answer from " + name);
 }
 
 //when we got ice candidate from another user 
-function onCandidate(candidate) { 
+function onCandidate(candidate, name) { 
    myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-   console.log("Got an ICE Candidate");
+   console.log("Got an ICE Candidate from " + name);
 }
 
 
