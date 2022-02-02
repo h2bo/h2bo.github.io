@@ -28,7 +28,7 @@ var ms;
 var myAudioDevice;
 
 
-
+//get the viewer's mic, so they can chat with the streamer
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
 	devices.forEach(function(device) 
@@ -42,9 +42,15 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 })
 
 
-
+//TODO: instead of swapping through tracks,
+//need to tell the Streamer to swap tracks.
 nextVideo.addEventListener("click", function()
 {
+	console.log("Next clicked");
+	send({ 
+		type: "goForward"
+	}); 
+	/*
 	var allVidTracks = ms.getVideoTracks();	
 	ms.removeTrack(allVidTracks[0]);
 	
@@ -53,10 +59,15 @@ nextVideo.addEventListener("click", function()
 		currentPlayingVideo = 0;
 	
 	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
+	*/
 });
 
 prevVideo.addEventListener("click", function()
 {
+	console.log("Back clicked");
+	send({ type: "goBack"});
+	
+	/*
 	var allVidTracks = ms.getVideoTracks();	
 	ms.removeTrack(allVidTracks[0]);
 	
@@ -65,6 +76,7 @@ prevVideo.addEventListener("click", function()
 		currentPlayingVideo = (qtyReceivedTracks - 1);
 	
 	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
+	*/
 });
 
 function initPrimaryVideo()
@@ -92,7 +104,6 @@ function receiveVideo(e){
 	if(e.track.kind === "audio")
 	{
 		receivedAudioTrack = e.track;
-		
 	}
 	else
 	{

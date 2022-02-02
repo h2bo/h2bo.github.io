@@ -13,8 +13,12 @@ var name = "";
 //This doesn't get the media; it just checks what is connected.
 ///////////////////////////////////////////////////////////////
 var myStreamingDevices = [];
+var currentStreamingTrackNum = 0;
+var myStreamingTracks = [];
 var deviceCounter = 0;
 var myAudioDevice;
+var theViewerSender;
+var theResearcherSender;
 
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
@@ -115,7 +119,13 @@ connection.onmessage = function (message) {
 			break; 
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
-			break; 
+			break;
+		case "goBack":
+			onGoBack();
+			break;
+		case "goForward":
+			onGoForward();
+			break;
 		default: 
 			break; 
 		}
@@ -207,29 +217,32 @@ async function onLogin(success) {
 		 var vidyaID = "video"+i;
 		 //document.querySelector('#'+vidyaID).srcObject = gumStream;
 		 
-		 for(const track of gumStream.getTracks())
-		 {
-			 console.log("Here is a track");
+		 console.log("Here is a track");
+		 myStreamingTracks[i] = gumStream.getTracks()[0];
+		 
+		 //for(const track of gumStream.getTracks())
+		 //{
+			 
 			 //myConnection.addTrack(track);
-			 for(let awesomeConnection of myConnections)
-			 {
-				 console.log("Adding video track");
-				 awesomeConnection.addTrack(track);
-			 }
-		 }
+			 
+		 //}
 	}
+	
+	//for(let awesomeConnection of myConnections)
+	//{
+		//console.log("Adding video track");
+		//awesomeConnection.addTrack(myStreamingTracks[currentStreamingTrackNum]);
+	//}
+	
+	theViewerSender = myConnections[0].addTrack(myStreamingTracks[currentStreamingTrackNum]);
+	theResearcherSender = myConnections[1].addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	
 	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
 	
-	for(const track of audioStream.getTracks())
+	for(let awesomeConnection of myConnections)
 	{
-		//myConnection.addTrack(track);
-		for(let awesomeConnection of myConnections)
-		{
-			console.log("Adding audio track");
-			awesomeConnection.addTrack(track);
-		}
-		
+		console.log("Adding audio track giggity");
+		awesomeConnection.addTrack(audioStream.getTracks()[0]);
 	}
 	
 	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
@@ -306,6 +319,31 @@ function receiveAudio(e)
 
 
 
+function onGoBack()
+{
+	currentStreamingTrackNum--;
+	if(currentStreamingTrackNum < 0)
+		currentStreamingTrackNum = myStreamingTracks.length - 1;
+	
+	theViewerSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
+	theResearcherSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
+}
+
+function onGoForward()
+{
+	currentStreamingTrackNum++;
+	if(currentStreamingTrackNum > myStreamingTracks.length - 1)
+		currentStreamingTrackNum = 0;
+	
+	theViewerSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
+	theResearcherSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
+}
+
+
+
+
+
+
 // Alias for sending messages in JSON format 
 function send(message, otherName) { 
 ///////////this function needs to change, to know who we are messaging
@@ -344,6 +382,7 @@ function send(message, otherName) {
 
 //when somebody wants to call us 
 //does this get fired in my implementation?
+//i do not think i need this - the Streamer is doing the calling, always
 /*
 function onOffer(offer, name) { 
    connectedUser = name; 
