@@ -27,6 +27,22 @@ var currentPlayingVideo = 0;
 var ms;
 var myAudioDevice;
 
+
+
+navigator.mediaDevices.enumerateDevices().then(function(devices) 
+{
+	devices.forEach(function(device) 
+	{			
+		if(device.kind === "audioinput")
+		{
+				console.log("Potential audio: " + device.deviceId + " " + device.label);
+				myAudioDevice = device;
+		}
+	});
+})
+
+
+
 nextVideo.addEventListener("click", function()
 {
 	var allVidTracks = ms.getVideoTracks();	
@@ -298,18 +314,3 @@ connectToOtherUsernameBtn.addEventListener("click", function () {
 
 
 
-navigator.mediaDevices.enumerateDevices().then(function(devices) 
-{
-	devices.forEach(function(device) 
-	{			
-		if(device.kind === "audioinput")
-		{
-			
-			if(device.label.includes("USB"))
-			{
-				console.log("Potential audio: " + device.deviceId + " " + device.label);
-				myAudioDevice = device;
-			}
-		}
-	});
-})

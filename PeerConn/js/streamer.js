@@ -43,8 +43,7 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 		else if(device.kind === "audioinput")
 		{
 			console.log("Potential audio: " + device.deviceId + " " + device.label);
-			if(device.label.includes("USB"))
-				myAudioDevice = device;
+			myAudioDevice = device;
 		}
 	});
 	
