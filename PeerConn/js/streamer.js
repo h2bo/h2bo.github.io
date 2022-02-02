@@ -1,23 +1,12 @@
-var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com'); //NECESSARY.  This is my custom signal server
-var name = ""; 
- 
-var loginInput = document.querySelector('#loginInput'); 
-var loginBtn = document.querySelector('#loginBtn'); 
-var otherUsernameInput = document.querySelector('#otherUsernameInput'); 
-var connectToOtherUsernameBtn = document.querySelector('#connectToOtherUsernameBtn'); 
-var callPage = document.querySelector('#callPage');
-var loginPage = document.querySelector('#loginPage');
-var videoPage = document.querySelector('#videoPage');
-var myVideo = document.querySelector('#myVideo');
-var remoteVideo = document.querySelector('#remoteVideo');
-var yourName = document.querySelector('#userLogin');
-var statusText = document.querySelector('#status');
-var videosContainer = document.querySelector('#videosContainer');
-var remoteVideosContainer = document.querySelector('#remoteVideosContainer');
+//NECESSARY.  This is my custom signal server
+var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 
-var connectedUser, myConnection, theStream;
-var keepCalling = true;
-var partnerName;
+//document selector for the status text.
+var statusText = document.querySelector('#status');
+
+var connectedUser;
+
+var name = "";
 
 ///////////////////////////////////////////////////////////////
 //Collect all of the streaming cameras that are found.
@@ -27,213 +16,90 @@ var myStreamingDevices = [];
 var deviceCounter = 0;
 var myAudioDevice;
 
-
-var dummy = 0;
-
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
 	devices.forEach(function(device) 
-	{			
+	{
 		if(device.kind === "videoinput")
 		{
-			//console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
 			myStreamingDevices[deviceCounter] = device.deviceId;
 			deviceCounter++;
 		}
 		else if(device.kind === "audioinput")
 		{
-			console.log("Potential audio: " + device.deviceId + " " + device.label);
 			myAudioDevice = device;
 		}
 	});
-	
-	//console.log("We have this many devices: " + myStreamingDevices.length);
-	
-	for(let i = 0; i < myStreamingDevices.length; i++)
-	{
-		//console.log(myStreamingDevices[i]);
-	}
 })
 
+var myConnections = [];
+var viewerUser;
+var researcherUser;
+var keepCallingViewer = true;
+var keepCallingResearcher = true;
 
 
-  
-  
-  
-function DoOneCall()
-{
-	
-		myConnection.createOffer(function (offer) {
-			
-         send({ 
-            type: "offer", 
-            offer: offer 
-         }); 
-			
-         myConnection.setLocalDescription(offer); 
-		 console.log(myConnection);
-      }, function (error) { 
-         alert("An error has occurred."); 
-      });
-		
-}
-  
-  
-  
-  
-//continual Call until pickup
+function onAnswer(answer, otherName) { 
 
-function TryCall()
-{
-	
-	dummy++;
-	
-	console.log("Now trying to call");
-	console.log(dummy);
-	console.log(keepCalling);
-	
-	if(keepCalling)
+	if(otherName === viewerUser)
 	{
-		console.log("Trying a call");
-		setTimeout(function(){DoOneCall(); TryCall()}, 2000);
-		console.log("Attempt complete");
+		console.log("Giggity");
+		myConnections[0].setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingViewer = false;
 	}
-}
-  
-  
-  
-  
-  
-  
-  
-function receiveAudio(e)
-{
-	console.log("received track!!");
-	console.log(e);
+	else
+	{
+		console.log("Researcher?");
+		myConnections[1].setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingResearcher = false;
+	}
+
+	//myConnections[otherName].setRemoteDescription(new RTCSessionDescription(answer));
+	//myConnection.setRemoteDescription(new RTCSessionDescription(answer));
+	console.log("Got an Answer from " + otherName);
 	
-	var ms = new MediaStream();
-	ms.addTrack(e.track);
-	
-	document.querySelector('#viewerAudio').srcObject = ms;
-	document.querySelector('#viewerAudio').play();
 }
 
-
-
-
-
-
-
-//when a user logs in 
-async function onLogin(success) { 
-
-   if (success === false) { 
-      alert("oops...try a different username"); 
-   } 
-   
-   else 
-   { 
-         //using Google public stun server 
-         var configuration = { 
-            "iceServers": 
-			[
-				{'urls': 'stun:stun1.l.google.com:19302'}, 
-				{'urls': 'stun:stun2.l.google.com:19302'},
-				{'urls': 'stun:stun3.l.google.com:19302'}, 
-				{'urls': 'stun:stun4.l.google.com:19302'},
-				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
-			]
-         }; 
-		
-		
-		console.log("Checkpoint 1");
-		
-		myConnection = new RTCPeerConnection(configuration); 
-		myConnection.addEventListener("track", e => receiveAudio(e), false);
-		
-		console.log("Checkpoint 2");
-
-         // Setup ice handling 
-         myConnection.onicecandidate = function (event) { 
-            if (event.candidate) { 
-               send({
-                  type: "candidate", 
-                  candidate: event.candidate 
-               }); 
-            } 
-         };  	
-
-	for(let i = 0; i < myStreamingDevices.length; i++)
+function onCandidate(candidate, otherName) {
+	
+	if(otherName === viewerUser)
 	{
-		var vidyaID = "video"+i;
-		 console.log("Vidya id: " + vidyaID);
-		 //videosContainer.innerHTML += '<video id="'+vidyaID+'" muted autoplay></video>';
+		myConnections[0].addIceCandidate(new RTCIceCandidate(candidate));
 	}
-	
-	console.log("Checkpoint 3");
-	
-	for(let i = 0; i < myStreamingDevices.length; i++)
+	else
 	{
-		 //getting local video stream 
-		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
-		 
-		 var vidyaID = "video"+i;
-		 //document.querySelector('#'+vidyaID).srcObject = gumStream;
-		 
-		 for(const track of gumStream.getTracks())
-		 {
-			 myConnection.addTrack(track);
-		 }
+		myConnections[1].addIceCandidate(new RTCIceCandidate(candidate));
 	}
-	
-	console.log("Checkpoint 4");
-	
-	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
-	
-	console.log("Checkpoint 5");
-	
-	for(const track of audioStream.getTracks())
-	{
-		myConnection.addTrack(track);
-	}
-	
-	console.log("Checkpoint 6");
-	
-	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
-	
-	const proxy = new URLSearchParams(window.location.search);
-	partnerName = proxy.get('vid');
-	connectedUser = partnerName;
-	
-	console.log("Checkpoint 7");
-	
-	TryCall();
-   } 
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
+	console.log("Got an ICE Candidate from " + otherName);
+}
+
+connection.onerror = function (err) { 
+   console.log("Got error", err); 
+};
+  
+connection.onopen = function () { 
+   console.log("Connected to the signalling server"); 
+   statusText.innerHTML = "Connected to the signalling server!";
+   DoLogin();
 };
 
+function DoLogin(){
+	
+	const proxy = new URLSearchParams(window.location.search);
+	
+	name = proxy.get('sid');	
+	if(name.length > 0){
+      send({ 
+         type: "login", 
+         name: name 
+      }); 
+	}
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  
-  
-  
 //handle messages from the server 
-connection.onmessage = function (message) { 
-   //console.log("Got message", message.data);
-   
+connection.onmessage = function (message) {   
    try{
 		var data = JSON.parse(message.data); 
 	
@@ -255,31 +121,230 @@ connection.onmessage = function (message) {
 		}
    }
    catch(error){
-	   //console.log("Got something not JSON");
+	   
    };
-};  
-  
-connection.onopen = function () { 
-   console.log("Connected to the signalling server"); 
-   statusText.innerHTML = "Connected to the signalling server!";
-   DoLogin();
 };
 
-connection.onerror = function (err) { 
-   console.log("Got error", err); 
+//when a user logs in 
+async function onLogin(success) { 
+
+   if (success === false) { 
+      alert("oops...try a different username"); 
+   } 
+   
+   else 
+   {
+		const proxy = new URLSearchParams(window.location.search);
+		viewerUser = proxy.get('vid');
+		researcherUser = proxy.get('rid');
+		
+		console.log(viewerUser + " is the viewer");
+		
+		
+		//using Google public stun server 
+		var configuration = { 
+			"iceServers":
+			[
+				{'urls': 'stun:stun1.l.google.com:19302'}, 
+				{'urls': 'stun:stun2.l.google.com:19302'},
+				{'urls': 'stun:stun3.l.google.com:19302'}, 
+				{'urls': 'stun:stun4.l.google.com:19302'},
+				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
+			]
+		};
+		
+		
+		//myConnection = new RTCPeerConnection(configuration);
+		//myConnection.addEventListener("track", e => receiveAudio(e), false);
+		myConnections[0] = new RTCPeerConnection(configuration);
+		myConnections[0].addEventListener("track", e=> receiveAudio(e), false);
+		
+		myConnections[1] = new RTCPeerConnection(configuration);
+		//do not need researcher audio, so skip
+		
+		
+		myConnections[0].onicecandidate = function(event){
+			if(event.candidate){
+				send({
+					type: "candidate",
+					candidate: event.candidate
+				},
+				viewerUser);
+			}
+		};
+		myConnections[1].onicecandidate = function(event){
+			if(event.candidate){
+				send({
+					type: "candidate",
+					candidate: event.candidate
+				},
+				researcherUser);
+			}
+		};		
+        /*
+         myConnection.onicecandidate = function (event) { 
+            if (event.candidate) { 
+               send({
+                  type: "candidate", 
+                  candidate: event.candidate
+               });
+            } 
+         }; 
+		*/
+
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		var vidyaID = "video"+i;
+		 console.log("Vidya id: " + vidyaID);
+	}
+	console.log("Quantity of peer connections: " + myConnections.length);
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		console.log("Trying to setup vidya");
+		 //getting local video stream 
+		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
+		 
+		 var vidyaID = "video"+i;
+		 //document.querySelector('#'+vidyaID).srcObject = gumStream;
+		 
+		 for(const track of gumStream.getTracks())
+		 {
+			 console.log("Here is a track");
+			 //myConnection.addTrack(track);
+			 for(let awesomeConnection of myConnections)
+			 {
+				 console.log("Adding video track");
+				 awesomeConnection.addTrack(track);
+			 }
+		 }
+	}
+	
+	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+	
+	for(const track of audioStream.getTracks())
+	{
+		//myConnection.addTrack(track);
+		for(let awesomeConnection of myConnections)
+		{
+			console.log("Adding audio track");
+			awesomeConnection.addTrack(track);
+		}
+		
+	}
+	
+	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
+	
+
+	
+	TryCall();
+   } 
 };
+
+//continual Call until pickup
+function TryCall()
+{
+	setTimeout(function()
+	{
+		if(keepCallingViewer)
+		{
+			console.log("Calling viewer....");
+			DoOneViewerCall();
+		}
+		
+		if(keepCallingResearcher)
+		{
+			console.log("Calling researcher.....");
+			DoOneResearcherCall();
+		}
+		
+		if(keepCallingViewer || keepCallingResearcher)
+			TryCall();
+		
+	}, 2000);
+	
+}
+
+function DoOneResearcherCall()
+{
+	//myConnection.createOffer(function (offer) {
+	myConnections[1].createOffer(function (offer) {
+		send({
+			type: "offer",
+			offer: offer
+		}, researcherUser);
+		
+	myConnections[1].setLocalDescription(offer);
+	//myConnection.setLocalDescription(offer); 
+	
+	}, function (error) {alert("An error has occurred.");});
+}
+
+function DoOneViewerCall()
+{
+	//myConnection.createOffer(function (offer) {
+	myConnections[0].createOffer(function (offer) {
+		send({
+			type: "offer",
+			offer: offer
+		}, viewerUser);
+		
+	myConnections[0].setLocalDescription(offer);
+	//myConnection.setLocalDescription(offer); 
+	
+	}, function (error) {alert("An error has occurred.");});
+}
+
+function receiveAudio(e)
+{	
+	var ms = new MediaStream();
+	ms.addTrack(e.track);
+	
+	document.querySelector('#viewerAudio').srcObject = ms;
+	document.querySelector('#viewerAudio').play();
+}
+
+
+
 
 // Alias for sending messages in JSON format 
-function send(message) { 
+function send(message, otherName) { 
 ///////////this function needs to change, to know who we are messaging
-   if (connectedUser) { 
-      message.name = connectedUser; 
+   if (otherName) { 
+      message.name = otherName; 
    } 
 	
    connection.send(JSON.stringify(message)); 
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //when somebody wants to call us 
+//does this get fired in my implementation?
+/*
 function onOffer(offer, name) { 
    connectedUser = name; 
    myConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -298,74 +363,4 @@ function onOffer(offer, name) {
    
    console.log("Got an Offer from " + name);
 }
-
-//when another user answers to our offer 
-function onAnswer(answer, name) { 
-   myConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
-   console.log("Got an Answer from " + name);
-   keepCalling = false;
-}
-
-//when we got ice candidate from another user 
-function onCandidate(candidate, name) { 
-   myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-   console.log("Got an ICE Candidate from " + name);
-}
-
-
-
-
-
-function DoLogin(){
-	
-	const proxy = new URLSearchParams(window.location.search);
-	
-	name = proxy.get('sid');
-	//partnerName = proxy.get('vid');
-	//connectedUser = partnerName;
-	
-	
-   if(name.length > 0){ 
-      send({ 
-         type: "login", 
-         name: name 
-      }); 
-   }
-   
-   //callPage.style.display = "inline";
-   //loginPage.style.display = "none";
-   //userLogin.innerHTML = name;
-}
-
-
-//setup a peer connection with another user 
-
-
-/*
-connectToOtherUsernameBtn.addEventListener("click", function () {
-  
-	console.log("The call button was clicked");
-	callPage.style.display = "none";
-	videoPage.style.display = "inline";
-	
-   var otherUsername = otherUsernameInput.value;
-   connectedUser = otherUsername;
-	
-   if (otherUsername.length > 0) { 
-      //make an offer 
-      myConnection.createOffer(function (offer) { 
-         console.log(); 
-			
-         send({ 
-            type: "offer", 
-            offer: offer 
-         }); 
-			
-         myConnection.setLocalDescription(offer); 
-		 console.log(myConnection);
-      }, function (error) { 
-         alert("An error has occurred."); 
-      }); 
-   } 
-});
 */
