@@ -144,14 +144,19 @@ async function onLogin(success) {
 				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
 			]
          }; 
-		 
+		
+		
+		console.log("Checkpoint 1");
+		
 		myConnection = new RTCPeerConnection(configuration); 
 		myConnection.addEventListener("track", e => receiveAudio(e), false);
+		
+		console.log("Checkpoint 2");
 
          // Setup ice handling 
          myConnection.onicecandidate = function (event) { 
             if (event.candidate) { 
-               send({ 
+               send({
                   type: "candidate", 
                   candidate: event.candidate 
                }); 
@@ -164,6 +169,8 @@ async function onLogin(success) {
 		 console.log("Vidya id: " + vidyaID);
 		 //videosContainer.innerHTML += '<video id="'+vidyaID+'" muted autoplay></video>';
 	}
+	
+	console.log("Checkpoint 3");
 	
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
@@ -179,17 +186,26 @@ async function onLogin(success) {
 		 }
 	}
 	
+	console.log("Checkpoint 4");
+	
 	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+	
+	console.log("Checkpoint 5");
+	
 	for(const track of audioStream.getTracks())
 	{
 		myConnection.addTrack(track);
 	}
+	
+	console.log("Checkpoint 6");
 	
 	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
 	
 	const proxy = new URLSearchParams(window.location.search);
 	partnerName = proxy.get('vid');
 	connectedUser = partnerName;
+	
+	console.log("Checkpoint 7");
 	
 	TryCall();
    } 
