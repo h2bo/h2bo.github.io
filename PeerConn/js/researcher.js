@@ -3,6 +3,7 @@ var name = "";
 
 var statusText = document.querySelector('#status');
 var primaryVid = document.querySelector('#primaryVid');
+var saveButton = document.querySelector('#saveButton');
 
 var connectedUser, myConnection, theStream;
 
@@ -12,21 +13,107 @@ var receivedAudioTrack;
 var currentPlayingVideo = 0;
 var ms;
 
+let mediaRecorder;
+let recordedBlobs;
+
 function initPrimaryVideo()
 {
-	ms = new MediaStream();
+	
 	
 	try{
-	ms.addTrack(receivedVideoTracks[0]);
-	ms.addTrack(receivedAudioTrack);
+		console.log("Adding vidya");
+		ms.addTrack(receivedVideoTracks[0]);
+		console.log("Adding audya");
+		ms.addTrack(receivedAudioTrack);
+		console.log("Got thru the stuff");
 	
-	primaryVid.srcObject = ms;
-	primaryVid.play();
+		primaryVid.srcObject = ms;
+		primaryVid.play();
 	}
 	catch(e){
 		console.log(e);
 	}
 }
+
+
+
+
+function startRecording() {
+  recordedBlobs = [];
+    const possibleTypes = [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=h264,opus',
+    'video/mp4;codecs=h264,aac',
+  ];
+  const mimeType = 'video/webm;codecs=h264,opus';
+  console.log("MIME Type: " + mimeType);
+  const options = {mimeType};
+
+  try {
+    mediaRecorder = new MediaRecorder(ms, options); //may need to change window.stream to "ms"
+  } catch (e) {
+    console.error('Exception while creating MediaRecorder:', e);
+    errorMsgElement.innerHTML = `Exception while creating MediaRecorder: ${JSON.stringify(e)}`;
+    return;
+  }
+
+  console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
+  
+    mediaRecorder.onstop = (event) => {
+    console.log('Recorder stopped: ', event);
+    console.log('Recorded Blobs: ', recordedBlobs);
+  };
+  
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start();
+  console.log('MediaRecorder started', mediaRecorder);
+}
+
+function handleDataAvailable(event) {
+  console.log('handleDataAvailable', event);
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+  }
+}
+
+
+
+stopButton.addEventListener("click", e=> stopRecording(), false);
+
+function stopRecording()
+{
+	console.log("Stopped recording");
+	
+	mediaRecorder.stop();
+}
+
+
+
+saveButton.addEventListener("click", e => saveVideoNow(), false);
+
+function saveVideoNow()
+{
+	console.log("Save Button was clicked");
+	//mediaRecorder.stop();
+	
+	const blob = new Blob(recordedBlobs, {type: 'video/webm'});
+	const url = window.URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.style.display = 'none';
+	a.href = url;
+	a.download = 'test.webm';
+	document.body.appendChild(a);
+	a.click();
+	setTimeout(() => {
+		document.body.removeChild(a);
+		window.URL.revokeObjectURL(url);
+	}, 100);
+}
+
+
+
+
 
 
 
@@ -46,6 +133,7 @@ function receiveVideo(e){
 	
 	document.querySelector('#connectStatus').style= "display: none";
 	initPrimaryVideo();
+	startRecording();
 }
 
 
@@ -72,6 +160,8 @@ async function onLogin(success) {
 		 
 		myConnection = new RTCPeerConnection(configuration); 
 		
+		ms = new MediaStream();
+		
 		myConnection.addEventListener("track", e => receiveVideo(e), false);
 
          // Setup ice handling 
@@ -84,11 +174,11 @@ async function onLogin(success) {
             } 
          };
 		 
-		const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
-		for(const track of audioStream.getTracks())
-		{
-			myConnection.addTrack(track);
-		}
+		//const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+		//for(const track of audioStream.getTracks())
+		//{
+			//myConnection.addTrack(track);
+		//}
 		
    } 
 };

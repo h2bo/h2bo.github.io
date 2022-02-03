@@ -168,7 +168,6 @@ async function onLogin(success) {
 		//myConnection.addEventListener("track", e => receiveAudio(e), false);
 		myConnections[0] = new RTCPeerConnection(configuration);
 		myConnections[0].addEventListener("track", e=> receiveAudio(e), false);
-		
 		myConnections[1] = new RTCPeerConnection(configuration);
 		//do not need researcher audio, so skip
 		

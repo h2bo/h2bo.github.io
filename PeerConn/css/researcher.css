@@ -1,0 +1,59 @@
+body{
+	margin:0px;
+}
+
+#primaryVid
+{
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+}
+
+#videoPage
+{	
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	margin: 0px;
+}
+
+#saveButton
+{
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	padding: 20px;
+	z-index: 10;
+}
+
+#stopButton
+{
+	position: absolute;
+	bottom: 0px;
+	right: 100px;
+	padding: 20px;
+	z-index: 10;
+}
+
+
+.navButton
+{
+	height: 100%;
+	background-color: red;
+	background-repeat: no-repeat;
+	border: none;
+	z-index: 10;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.navButton:hover
+{
+	background-color: orange;
+}
+
+.navButton:active
+{
+	background-color: blue;
+}
+
