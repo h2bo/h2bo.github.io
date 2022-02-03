@@ -20,6 +20,8 @@ var myAudioDevice;
 var theViewerSender;
 var theResearcherSender;
 
+var gotAudio = false;
+
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
 	devices.forEach(function(device) 
@@ -31,8 +33,16 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 		}
 		else if(device.kind === "audioinput")
 		{
-			myAudioDevice = device;
+			if(!gotAudio)
+			{
+				myAudioDevice = device;
+				//gotAudio = true;
+				console.log("Got an audio");
+				console.log(device);
+			}
 		}
+		
+		//console.log(device);
 	});
 })
 
@@ -86,7 +96,7 @@ connection.onerror = function (err) {
 connection.onopen = function () { 
    console.log("Connected to the signalling server"); 
    statusText.innerHTML = "Connected to the signalling server!";
-   DoLogin();
+   setTimeout(function(){DoLogin()}, 1000);
 };
 
 function DoLogin(){
@@ -104,6 +114,7 @@ function DoLogin(){
 
 //handle messages from the server 
 connection.onmessage = function (message) {   
+		
    try{
 		var data = JSON.parse(message.data); 
 	
@@ -144,6 +155,7 @@ async function onLogin(success) {
    
    else 
    {
+		console.log("logging in now");
 		const proxy = new URLSearchParams(window.location.search);
 		viewerUser = proxy.get('vid');
 		researcherUser = proxy.get('rid');
@@ -200,6 +212,25 @@ async function onLogin(success) {
             } 
          }; 
 		*/
+		
+		
+		
+		console.log("Dude 1");
+	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
+	console.log("Dude 2");
+	console.log(audioStream);
+	
+	var theAudioTrack = audioStream.getTracks()[0];
+	
+	
+	
+	console.log("Adding audio to the connections now");
+	myConnections[0].addTrack(theAudioTrack);
+	myConnections[1].addTrack(theAudioTrack);
+	
+	
+	
+		
 
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
@@ -219,6 +250,8 @@ async function onLogin(success) {
 		 console.log("Here is a track");
 		 myStreamingTracks[i] = gumStream.getTracks()[0];
 		 
+		 console.log("Track is: " + gumStream.getTracks()[0]);
+		 
 		 //for(const track of gumStream.getTracks())
 		 //{
 			 
@@ -236,13 +269,13 @@ async function onLogin(success) {
 	theViewerSender = myConnections[0].addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	theResearcherSender = myConnections[1].addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	
-	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
 	
-	for(let awesomeConnection of myConnections)
-	{
-		console.log("Adding audio track giggity");
-		awesomeConnection.addTrack(audioStream.getTracks()[0]);
-	}
+
+	//for(let awesomeConnection of myConnections)
+	//{
+		//console.log("Adding audio track giggity");
+		//awesomeConnection.addTrack(audioStream.getTracks()[0]);
+	//}
 	
 	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
 	

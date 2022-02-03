@@ -27,7 +27,7 @@ var currentPlayingVideo = 0;
 var ms;
 var myAudioDevice;
 
-
+var gotAudio = false;
 //get the viewer's mic, so they can chat with the streamer
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
@@ -35,8 +35,12 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 	{			
 		if(device.kind === "audioinput")
 		{
+			if(!gotAudio)
+			{
 				console.log("Potential audio: " + device.deviceId + " " + device.label);
 				myAudioDevice = device;
+				gotAudio = true;
+			}
 		}
 	});
 })
