@@ -238,6 +238,12 @@ async function onLogin(success) {
 		var vidyaID = "video"+i;
 		 console.log("Vidya id: " + vidyaID);
 	}
+	
+	statusText.innerHTML += "<br/>Checkpoint 4.2";
+	
+	statusText.innerHTML += "<br/>Quantity of devices: " + myStreamingDevices.length;
+	
+	
 	console.log("Quantity of peer connections: " + myConnections.length);
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
