@@ -155,6 +155,7 @@ async function onLogin(success) {
    
    else 
    {
+	   statusText.innerHTML += "<br/>Checkpoint 1";
 		console.log("logging in now");
 		const proxy = new URLSearchParams(window.location.search);
 		viewerUser = proxy.get('vid');
@@ -183,7 +184,7 @@ async function onLogin(success) {
 		myConnections[1] = new RTCPeerConnection(configuration);
 		//do not need researcher audio, so skip
 		
-		
+		statusText.innerHTML += "<br/>Checkpoint 2";
 		myConnections[0].onicecandidate = function(event){
 			if(event.candidate){
 				send({
@@ -213,7 +214,7 @@ async function onLogin(success) {
          }; 
 		*/
 		
-		
+		statusText.innerHTML += "<br/>Checkpoint 3";
 		
 		console.log("Dude 1");
 	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
@@ -229,7 +230,7 @@ async function onLogin(success) {
 	myConnections[1].addTrack(theAudioTrack);
 	
 	
-	
+	statusText.innerHTML += "<br/>Checkpoint 4";
 		
 
 	for(let i = 0; i < myStreamingDevices.length; i++)
@@ -260,6 +261,8 @@ async function onLogin(success) {
 		 //}
 	}
 	
+	statusText.innerHTML += "<br/>Checkpoint 5";
+	
 	//for(let awesomeConnection of myConnections)
 	//{
 		//console.log("Adding video track");
@@ -280,7 +283,7 @@ async function onLogin(success) {
 	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
 	
 
-	
+	statusText.innerHTML += "<br/>Checkpoint 6";
 	TryCall();
    } 
 };
