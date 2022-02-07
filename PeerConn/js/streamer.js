@@ -87,15 +87,14 @@ function onCandidate(candidate, otherName) {
 	}
 	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
 	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-	console.log("Got an ICE Candidate from " + otherName);
+	MyLog("Got an ICE Candidate from " + otherName);
 }
 
 connection.onerror = function (err) { 
-   console.log("Got error", err); 
+   MyLog("Got error", err); 
 };
   
 connection.onopen = function () { 
-   console.log("Connected to the signalling server"); 
    MyLog("Connected to the signalling server!");
    setTimeout(function(){DoLogin()}, 1000);
 };
@@ -237,7 +236,7 @@ async function onLogin(success) {
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
 		var vidyaID = "video"+i;
-		 console.log("Vidya id: " + vidyaID);
+		 MyLog("Vidya id: " + vidyaID);
 	}
 	
 	MyLog("<br/>Checkpoint 4.2");
@@ -248,17 +247,18 @@ async function onLogin(success) {
 	MyLog("Quantity of peer connections: " + myConnections.length);
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
-		console.log("Trying to setup vidya");
+		try{
+		MyLog("Trying to setup vidya");
 		 //getting local video stream 
 		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
 		 
 		 var vidyaID = "video"+i;
 		 //document.querySelector('#'+vidyaID).srcObject = gumStream;
 		 
-		 console.log("Here is a track");
+		 MyLog("Here is a track");
 		 myStreamingTracks[i] = gumStream.getTracks()[0];
 		 
-		 console.log("Track is: " + gumStream.getTracks()[0]);
+		 MyLog("Track is: " + gumStream.getTracks()[0]);
 		 
 		 //for(const track of gumStream.getTracks())
 		 //{
@@ -266,6 +266,11 @@ async function onLogin(success) {
 			 //myConnection.addTrack(track);
 			 
 		 //}
+		}
+		catch(e)
+		{
+			MyLog(e);
+		}
 	}
 	
 	MyLog("<br/>Checkpoint 5");
@@ -302,13 +307,13 @@ function TryCall()
 	{
 		if(keepCallingViewer)
 		{
-			console.log("Calling viewer....");
+			MyLog("Calling viewer....");
 			DoOneViewerCall();
 		}
 		
 		if(keepCallingResearcher)
 		{
-			console.log("Calling researcher.....");
+			MyLog("Calling researcher.....");
 			DoOneResearcherCall();
 		}
 		
