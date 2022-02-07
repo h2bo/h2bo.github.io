@@ -37,7 +37,8 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 			{
 				myAudioDevice = device;
 				//gotAudio = true;
-				console.log("Got an audio");
+				MyLog("Got an audio");
+				MyLog(device);
 				console.log(device);
 			}
 		}
@@ -57,20 +58,20 @@ function onAnswer(answer, otherName) {
 
 	if(otherName === viewerUser)
 	{
-		console.log("Giggity");
+		MyLog("Giggity");
 		myConnections[0].setRemoteDescription(new RTCSessionDescription(answer));
 		keepCallingViewer = false;
 	}
 	else
 	{
-		console.log("Researcher?");
+		MyLog("Researcher?");
 		myConnections[1].setRemoteDescription(new RTCSessionDescription(answer));
 		keepCallingResearcher = false;
 	}
 
 	//myConnections[otherName].setRemoteDescription(new RTCSessionDescription(answer));
 	//myConnection.setRemoteDescription(new RTCSessionDescription(answer));
-	console.log("Got an Answer from " + otherName);
+	MyLog("Got an Answer from " + otherName);
 	
 }
 
@@ -95,7 +96,7 @@ connection.onerror = function (err) {
   
 connection.onopen = function () { 
    console.log("Connected to the signalling server"); 
-   statusText.innerHTML = "Connected to the signalling server!";
+   MyLog("Connected to the signalling server!");
    setTimeout(function(){DoLogin()}, 1000);
 };
 
@@ -155,13 +156,13 @@ async function onLogin(success) {
    
    else 
    {
-	   statusText.innerHTML += "<br/>Checkpoint 1";
-		console.log("logging in now");
+	   MyLog("<br/>Checkpoint 1");
+		MyLog("logging in now");
 		const proxy = new URLSearchParams(window.location.search);
 		viewerUser = proxy.get('vid');
 		researcherUser = proxy.get('rid');
 		
-		console.log(viewerUser + " is the viewer");
+		MyLog(viewerUser + " is the viewer");
 		
 		
 		//using Google public stun server 
@@ -184,7 +185,7 @@ async function onLogin(success) {
 		myConnections[1] = new RTCPeerConnection(configuration);
 		//do not need researcher audio, so skip
 		
-		statusText.innerHTML += "<br/>Checkpoint 2";
+		MyLog("<br/>Checkpoint 2");
 		myConnections[0].onicecandidate = function(event){
 			if(event.candidate){
 				send({
@@ -214,23 +215,23 @@ async function onLogin(success) {
          }; 
 		*/
 		
-		statusText.innerHTML += "<br/>Checkpoint 3";
+		MyLog("<br/>Checkpoint 3");
 		
-		console.log("Dude 1");
+		MyLog("Dude 1");
 	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
-	console.log("Dude 2");
-	console.log(audioStream);
+	MyLog("Dude 2");
+	MyLog(audioStream);
 	
 	var theAudioTrack = audioStream.getTracks()[0];
 	
 	
 	
-	console.log("Adding audio to the connections now");
+	MyLog("Adding audio to the connections now");
 	myConnections[0].addTrack(theAudioTrack);
 	myConnections[1].addTrack(theAudioTrack);
 	
 	
-	statusText.innerHTML += "<br/>Checkpoint 4";
+	MyLog("<br/>Checkpoint 4");
 		
 
 	for(let i = 0; i < myStreamingDevices.length; i++)
@@ -239,12 +240,12 @@ async function onLogin(success) {
 		 console.log("Vidya id: " + vidyaID);
 	}
 	
-	statusText.innerHTML += "<br/>Checkpoint 4.2";
+	MyLog("<br/>Checkpoint 4.2");
 	
-	statusText.innerHTML += "<br/>Quantity of devices: " + myStreamingDevices.length;
+	MyLog("<br/>Quantity of devices: " + myStreamingDevices.length);
 	
 	
-	console.log("Quantity of peer connections: " + myConnections.length);
+	MyLog("Quantity of peer connections: " + myConnections.length);
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
 		console.log("Trying to setup vidya");
@@ -267,7 +268,7 @@ async function onLogin(success) {
 		 //}
 	}
 	
-	statusText.innerHTML += "<br/>Checkpoint 5";
+	MyLog("<br/>Checkpoint 5");
 	
 	//for(let awesomeConnection of myConnections)
 	//{
@@ -286,10 +287,10 @@ async function onLogin(success) {
 		//awesomeConnection.addTrack(audioStream.getTracks()[0]);
 	//}
 	
-	statusText.innerHTML = "Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.";
+	MyLog("Connected and streaming " + myStreamingDevices.length + " devices.<br/>Keep this page up and running.");
 	
 
-	statusText.innerHTML += "<br/>Checkpoint 6";
+	MyLog("<br/>Checkpoint 6");
 	TryCall();
    } 
 };
@@ -444,3 +445,10 @@ function onOffer(offer, name) {
    console.log("Got an Offer from " + name);
 }
 */
+
+
+function MyLog(message)
+{
+	console.log(message);
+	statusText.innerHTML += ("<br/>" + message);
+}
