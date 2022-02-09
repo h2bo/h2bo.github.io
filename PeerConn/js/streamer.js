@@ -3,6 +3,7 @@ var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 
 //document selector for the status text.
 var statusText = document.querySelector('#status');
+var usbButton = document.querySelector('#usbButton');
 
 var connectedUser;
 
@@ -21,6 +22,32 @@ var theViewerSender;
 var theResearcherSender;
 
 var gotAudio = false;
+
+
+function TryUSB()
+{
+	navigator.usb.requestDevice({filters:[]}).then(function(device){
+		console.log(device);
+	});
+}
+
+usbButton.addEventListener("click", TryUSB, false);
+
+
+navigator.usb.getDevices().then(devices =>
+{
+	MyLog("Trying to get USB devices");
+	MyLog(devices.length);
+	devices.forEach(device => 
+	{
+		MyLog("USB Thing: " + device.productName + " " + device.serialNumber);
+	})
+});
+
+
+
+
+
 
 navigator.mediaDevices.enumerateDevices().then(function(devices) 
 {
