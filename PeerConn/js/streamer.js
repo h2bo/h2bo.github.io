@@ -36,12 +36,20 @@ usbButton.addEventListener("click", TryUSB, false);
 
 navigator.usb.getDevices().then(devices =>
 {
+	MyLog("Button pressed");
+	try
+	{
 	MyLog("Trying to get USB devices");
 	MyLog(devices.length);
 	devices.forEach(device => 
 	{
 		MyLog("USB Thing: " + device.productName + " " + device.serialNumber);
 	})
+	}
+	catch(e)
+	{
+		MyLog(e);
+	}
 });
 
 
