@@ -31,7 +31,7 @@ function TryUSB()
 	});
 }
 
-usbButton.addEventListener("click", TryUSB, false);
+usbButton.addEventListener("click", TryStuff, false);
 
 
 navigator.usb.getDevices().then(devices =>
@@ -50,38 +50,41 @@ navigator.usb.getDevices().then(devices =>
 	{
 		MyLog(e);
 	}
-});
-
-
-
-
-
-
-navigator.mediaDevices.enumerateDevices().then(function(devices) 
-{
-	devices.forEach(function(device) 
-	{
-		if(device.kind === "videoinput")
-		{
-			MyLog("Awesome thingy: " + device.label);
-			myStreamingDevices[deviceCounter] = device.deviceId;
-			deviceCounter++;
-		}
-		else if(device.kind === "audioinput")
-		{
-			if(!gotAudio)
-			{
-				myAudioDevice = device;
-				//gotAudio = true;
-				MyLog("Got an audio");
-				MyLog(device);
-				console.log(device);
-			}
-		}
-		
-		//console.log(device);
-	});
 })
+
+
+function TryStuff()
+{
+	navigator.mediaDevices.enumerateDevices().then(function(devices) 
+	{
+		devices.forEach(function(device) 
+		{
+			if(device.kind === "videoinput")
+			{
+				MyLog("Awesome thingy: " + device.label);
+				myStreamingDevices[deviceCounter] = device.deviceId;
+				deviceCounter++;
+			}
+			else if(device.kind === "audioinput")
+			{
+				if(!gotAudio)
+				{
+					myAudioDevice = device;
+					//gotAudio = true;
+					MyLog("Got an audio");
+					MyLog(device);
+					console.log(device);
+				}
+			}
+		
+			//console.log(device);
+		});
+	})
+}
+
+
+
+
 
 var myConnections = [];
 var viewerUser;
