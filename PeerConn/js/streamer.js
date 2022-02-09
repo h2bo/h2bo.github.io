@@ -258,7 +258,7 @@ async function onLogin(success) {
 		 MyLog("Here is a track");
 		 myStreamingTracks[i] = gumStream.getTracks()[0];
 		 
-		 MyLog("Track is: " + gumStream.getTracks()[0]);
+		 MyLog("Track is: " + myStreamingTracks[i].label);
 		 
 		 //for(const track of gumStream.getTracks())
 		 //{
