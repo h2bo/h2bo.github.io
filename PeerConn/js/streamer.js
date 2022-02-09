@@ -26,15 +26,14 @@ var gotAudio = false;
 
 function TryUSB()
 {
+	
+		
 	navigator.usb.requestDevice({filters:[]}).then(function(device){
 		console.log(device);
 	});
-}
-
-usbButton.addEventListener("click", TryStuff, false);
-
-
-navigator.usb.getDevices().then(devices =>
+	
+	
+	navigator.usb.getDevices().then(devices =>
 {
 	MyLog("Button pressed");
 	try
@@ -51,6 +50,15 @@ navigator.usb.getDevices().then(devices =>
 		MyLog(e);
 	}
 })
+	
+	
+
+}
+
+usbButton.addEventListener("click", TryUSB, false);
+
+
+
 
 
 function TryStuff()
