@@ -28,6 +28,7 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 	{
 		if(device.kind === "videoinput")
 		{
+			MyLog("Awesome thingy: " + device.label);
 			myStreamingDevices[deviceCounter] = device.deviceId;
 			deviceCounter++;
 		}
