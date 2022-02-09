@@ -3,8 +3,6 @@ var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 
 //document selector for the status text.
 var statusText = document.querySelector('#status');
-var usbButton = document.querySelector('#usbButton');
-var otherButton = document.querySelector('#otherButton');
 
 var connectedUser;
 
@@ -24,7 +22,34 @@ var theResearcherSender;
 
 var gotAudio = false;
 
+	navigator.mediaDevices.enumerateDevices().then(function(devices) 
+	{
+		devices.forEach(function(device) 
+		{
+			if(device.kind === "videoinput")
+			{
+				MyLog("Awesome thingy: " + device.label);
+				myStreamingDevices[deviceCounter] = device.deviceId;
+				deviceCounter++;
+			}
+			else if(device.kind === "audioinput")
+			{
+				if(!gotAudio)
+				{
+					myAudioDevice = device;
+					//gotAudio = true;
+					MyLog("Got an audio");
+					MyLog(device);
+					console.log(device);
+				}
+			}
+		
+			//console.log(device);
+		});
+	})
 
+
+/*
 function TryUSB()
 {
 	
@@ -52,46 +77,8 @@ function TryUSB()
 	}
 })
 	
-	
-
 }
-
-usbButton.addEventListener("click", TryUSB, false);
-otherButton.addEventListener("click", TryStuff, false);
-
-
-
-
-
-function TryStuff()
-{
-	navigator.mediaDevices.enumerateDevices().then(function(devices) 
-	{
-		devices.forEach(function(device) 
-		{
-			if(device.kind === "videoinput")
-			{
-				MyLog("Awesome thingy: " + device.label);
-				myStreamingDevices[deviceCounter] = device.deviceId;
-				deviceCounter++;
-			}
-			else if(device.kind === "audioinput")
-			{
-				if(!gotAudio)
-				{
-					myAudioDevice = device;
-					//gotAudio = true;
-					MyLog("Got an audio");
-					MyLog(device);
-					console.log(device);
-				}
-			}
-		
-			//console.log(device);
-		});
-	})
-}
-
+*/
 
 
 
