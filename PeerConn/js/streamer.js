@@ -4,6 +4,7 @@ var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 //document selector for the status text.
 var statusText = document.querySelector('#status');
 var usbButton = document.querySelector('#usbButton');
+var otherButton = document.querySelector('#otherButton');
 
 var connectedUser;
 
@@ -56,6 +57,7 @@ function TryUSB()
 }
 
 usbButton.addEventListener("click", TryUSB, false);
+otherButton.addEventListener("click", TryStuff, false);
 
 
 
