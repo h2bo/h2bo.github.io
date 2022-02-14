@@ -28,16 +28,19 @@ var gotAudio = false;
 		{
 			if(device.kind === "videoinput")
 			{
+				if(device.label.includes("USB"))
+				{
 				MyLog("Awesome thingy: " + device.label);
 				myStreamingDevices[deviceCounter] = device.deviceId;
 				deviceCounter++;
+				}
 			}
 			else if(device.kind === "audioinput")
 			{
 				if(!gotAudio)
 				{
 					myAudioDevice = device;
-					//gotAudio = true;
+					gotAudio = true;
 					MyLog("Got an audio");
 					MyLog(device);
 					console.log(device);
@@ -132,7 +135,7 @@ connection.onerror = function (err) {
   
 connection.onopen = function () { 
    MyLog("Connected to the signalling server!");
-   setTimeout(function(){DoLogin()}, 1000);
+   setTimeout(function(){DoLogin()}, 2000);
 };
 
 function DoLogin(){
