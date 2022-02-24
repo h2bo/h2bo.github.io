@@ -28,7 +28,7 @@ var gotAudio = false;
 		{
 			if(device.kind === "videoinput")
 			{
-				if(device.label.includes("USB"))
+				if(device.label.includes("USB") || device.label.includes("C270"))
 				{
 				MyLog("Awesome thingy: " + device.label);
 				myStreamingDevices[deviceCounter] = device.deviceId;
