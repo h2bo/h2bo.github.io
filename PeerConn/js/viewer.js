@@ -1,30 +1,24 @@
 var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com'); //NECESSARY.  This is my custom signal server
-var name = ""; 
+//var name = ""; 
+var streamerName = "";
+var researcherName = "";
  
-var loginInput = document.querySelector('#loginInput'); 
-var loginBtn = document.querySelector('#loginBtn'); 
-var otherUsernameInput = document.querySelector('#otherUsernameInput'); 
-var connectToOtherUsernameBtn = document.querySelector('#connectToOtherUsernameBtn'); 
-var callPage = document.querySelector('#callPage');
-var loginPage = document.querySelector('#loginPage');
+var loginButton = document.querySelector('#loginButton'); 
 var videoPage = document.querySelector('#videoPage');
-var myVideo = document.querySelector('#myVideo');
-var remoteVideo = document.querySelector('#remoteVideo');
-var yourName = document.querySelector('#userLogin');
+var connectStatus = document.querySelector('#connectStatus');
 var statusText = document.querySelector('#status');
-var videosContainer = document.querySelector('#videosContainer');
-var remoteVideosContainer = document.querySelector('#remoteVideosContainer');
 var primaryVid = document.querySelector('#primaryVid');
 var prevVideo = document.querySelector('#prevVideo');
 var nextVideo = document.querySelector('#nextVideo');
 
 var connectedUser, myConnection, theStream;
+var myResearcherConnection;
 
 var qtyReceivedTracks = 0;
 var receivedVideoTracks = [];
 var receivedAudioTrack;
 var currentPlayingVideo = 0;
-var ms;
+var ms = new MediaStream;
 var myAudioDevice;
 
 var gotAudio = false;
@@ -46,6 +40,20 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 })
 
 
+const proxy = new URLSearchParams(window.location.search);
+	
+var viewerName = proxy.get('vid');
+var streamerName = proxy.get('sid');
+var researcherName = proxy.get('rid');
+
+
+loginButton.addEventListener("click", function()
+{
+	DoViewerLogin();
+	loginButton.disabled = true;
+});
+
+
 //TODO: instead of swapping through tracks,
 //need to tell the Streamer to swap tracks.
 nextVideo.addEventListener("click", function()
@@ -53,7 +61,7 @@ nextVideo.addEventListener("click", function()
 	console.log("Next clicked");
 	send({ 
 		type: "goForward"
-	}); 
+	}, streamerName); 
 	/*
 	var allVidTracks = ms.getVideoTracks();	
 	ms.removeTrack(allVidTracks[0]);
@@ -69,7 +77,7 @@ nextVideo.addEventListener("click", function()
 prevVideo.addEventListener("click", function()
 {
 	console.log("Back clicked");
-	send({ type: "goBack"});
+	send({ type: "goBack"},streamerName);
 	
 	/*
 	var allVidTracks = ms.getVideoTracks();	
@@ -88,11 +96,11 @@ function initPrimaryVideo()
 	ms = new MediaStream();
 	
 	try{
-	ms.addTrack(receivedVideoTracks[0]);
-	ms.addTrack(receivedAudioTrack);
+		ms.addTrack(receivedVideoTracks[0]);
+		ms.addTrack(receivedAudioTrack);
 	
-	primaryVid.srcObject = ms;
-	primaryVid.play();
+		primaryVid.srcObject = ms;
+		primaryVid.play();
 	}
 	catch(e){
 		console.log(e);
@@ -148,17 +156,27 @@ async function onLogin(success) {
          }; 
 		 
 		myConnection = new RTCPeerConnection(configuration); 
+		myResearcherConnection = new RTCPeerConnection(configuration);
 		
 		myConnection.addEventListener("track", e => receiveVideo(e), false);
 		//myConnection.ontrack = (e) => receiveVideo(e);
 
          // Setup ice handling 
-         myConnection.onicecandidate = function (event) { 
+        myConnection.onicecandidate = function (event) { 
             if (event.candidate) { 
                send({ 
                   type: "candidate", 
                   candidate: event.candidate 
-               }); 
+               }, streamerName); 
+            } 
+         };
+		 
+        myResearcherConnection.onicecandidate = function (event) { 
+            if (event.candidate) { 
+               send({ 
+                  type: "candidate", 
+                  candidate: event.candidate 
+               }, researcherName); 
             } 
          };
 		 
@@ -166,20 +184,65 @@ async function onLogin(success) {
 		for(const track of audioStream.getTracks())
 		{
 			myConnection.addTrack(track);
+			myResearcherConnection.addTrack(track);
 		}
 		
+		
+		TryCall();
    } 
 };
 
 
 
+var keepCallingResearcher = true;
+
+//continual Call until pickup
+function TryCall()
+{
+	setTimeout(function()
+	{
+		if(keepCallingResearcher)
+		{
+			MyLog("Calling researcher.....");
+			DoOneResearcherCall();
+		}
+		
+		TryCall();
+		
+	}, 2000);
+}
+
+
+function DoOneResearcherCall()
+{
+	//myConnection.createOffer(function (offer) {
+	myResearcherConnection.createOffer(function (offer) {
+		send({
+			type: "offer",
+			offer: offer
+		}, researcherName);
+		
+	myResearcherConnection.setLocalDescription(offer);
+	//myConnection.setLocalDescription(offer); 
+	
+	}, function (error) {alert("An error has occurred.");});
+}
 
 
 
+function onAnswer(answer, otherName) { 
 
-
-
-
+	MyLog(otherName + " " + researcherName);
+	if(otherName === researcherName)
+	{
+		MyLog("Giggity");
+		myResearcherConnection.setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingResearcher = false;
+	}
+	
+	MyLog("Got an Answer from " + otherName);
+	
+}
 
 
 
@@ -210,6 +273,10 @@ connection.onmessage = function (message) {
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
 			break; 
+			
+		case "leave":
+			onLeave();
+			break;
 		default: 
 			break; 
 		}
@@ -218,29 +285,44 @@ connection.onmessage = function (message) {
 	   //console.log("Got something not JSON");
    };
 };  
+
+
+function onLeave()
+{
+	console.log("Somebody left!!");
+}
+
+
   
 connection.onopen = function () { 
    console.log("Connected to the signalling server"); 
    statusText.innerHTML = "Connected to the signalling server!";
-   DoViewerLogin();
+   loginButton.disabled = false;
 };
 
 connection.onerror = function (err) { 
    console.log("Got error", err); 
 };
 
-// Alias for sending messages in JSON format 
-function send(message) { 
+connection.onclose = function (e) {
+	console.log("CLOSED");
+	console.log(e);
+	console.log("CLOSED COMPLETE");
+};
 
-   if (connectedUser) { 
-      message.name = connectedUser; 
+// Alias for sending messages in JSON format 
+function send(message, otherName) { 
+
+   if (otherName) { 
+      message.name = otherName; 
    } 
 	
    connection.send(JSON.stringify(message)); 
 };
 
 //when somebody wants to call us 
-function onOffer(offer, name) { 
+function onOffer(offer, name) 
+{ 
    connectedUser = name; 
    myConnection.setRemoteDescription(new RTCSessionDescription(offer));
 	
@@ -250,9 +332,9 @@ function onOffer(offer, name) {
       send({ 
          type: "answer", 
          answer: answer 
-      }); 
+      }, connectedUser); 
 		
-   }, function (error) { 
+   }, function (error) {
       alert("oops...error"); 
    }); 
    
@@ -260,29 +342,38 @@ function onOffer(offer, name) {
 }
 
 //when another user answers to our offer 
-function onAnswer(answer, name) { 
-   myConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
-   console.log("Got an Answer from " + name);
-}
+//function onAnswer(answer, name) { 
+   //myResearcherConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
+   //console.log("Got an Answer from " + name);
+//}
 
 //when we got ice candidate from another user 
-function onCandidate(candidate, name) { 
-   myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-   console.log("Got an ICE Candidate from " + name);
+function onCandidate(candidate, name) {
+	
+
+	if(otherName === streamerName)
+	{
+		myConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	else
+	{
+		myResearcherConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
+	MyLog("Got an ICE Candidate from " + otherName);
 }
 
 
 
 function DoViewerLogin()
 {
-	const proxy = new URLSearchParams(window.location.search);
+
 	
-	name = proxy.get('vid');
-	
-   if(name.length > 0){ 
+   if(viewerName.length > 0){ 
       send({ 
          type: "login", 
-         name: name 
+         name: viewerName 
       }); 
    }
    
@@ -319,13 +410,8 @@ connectToOtherUsernameBtn.addEventListener("click", function () {
 */
 
 
-
-
-
-
-
-
-
-
-
-
+function MyLog(message)
+{
+	console.log(message);
+	statusText.innerHTML += ("<br/>" + message);
+}

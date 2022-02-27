@@ -18,7 +18,16 @@ var myStreamingTracks = [];
 var deviceCounter = 0;
 var myAudioDevice;
 var theViewerSender;
+var theViewerAudioSender;
 var theResearcherSender;
+var theResearcherAudioSender;
+
+var prevTrack;
+
+var frontTrack;
+var behindTrack;
+var leftTrack;
+var rightTrack;
 
 var gotAudio = false;
 
@@ -37,13 +46,15 @@ var gotAudio = false;
 			}
 			else if(device.kind === "audioinput")
 			{
+				MyLog("Audio:" + device.deviceId);
+				MyLog(device);
+				if(device.deviceId.includes("comm")) //this needs to be changed; needs to be whatever the bluetooth shit is
 				if(!gotAudio)
 				{
 					myAudioDevice = device;
 					gotAudio = true;
 					MyLog("Got an audio");
 					MyLog(device);
-					console.log(device);
 				}
 			}
 		
@@ -176,6 +187,27 @@ connection.onmessage = function (message) {
 		case "goForward":
 			onGoForward();
 			break;
+		case "mute":
+			onMute();
+			break;
+		case "resume":
+			onResume();
+			break;
+		case "front":
+			onFront();
+			break;
+		case "behind":
+			onBehind();
+			break;
+		case "left":
+			onLeft();
+			break;
+		case "right":
+			onRight();
+			break;
+		case "leave":
+			onLeave(data.name);
+			break;
 		default: 
 			break; 
 		}
@@ -265,8 +297,8 @@ async function onLogin(success) {
 	
 	
 	MyLog("Adding audio to the connections now");
-	myConnections[0].addTrack(theAudioTrack);
-	myConnections[1].addTrack(theAudioTrack);
+	theViewerAudioSender = myConnections[0].addTrack(theAudioTrack);
+	theResearcherAudioSender = myConnections[1].addTrack(theAudioTrack);
 	
 	
 	MyLog("<br/>Checkpoint 4");
@@ -356,8 +388,7 @@ function TryCall()
 			DoOneResearcherCall();
 		}
 		
-		if(keepCallingViewer || keepCallingResearcher)
-			TryCall();
+		TryCall();
 		
 	}, 2000);
 	
@@ -402,9 +433,6 @@ function receiveAudio(e)
 	document.querySelector('#viewerAudio').play();
 }
 
-
-
-
 function onGoBack()
 {
 	currentStreamingTrackNum--;
@@ -425,6 +453,61 @@ function onGoForward()
 	theResearcherSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
 }
 
+
+function onMute()
+{
+	//need a way to stop streaming to both researcher and viewer... 
+	//perhaps replace track with null?
+	
+	prevTrack = myStreamingTracks[currentStreamingTrackNum];
+	
+	theViewerSender.replaceTrack(null);
+	theResearcherSender.replaceTrack(null);
+}
+
+function onResume()
+{
+	theViewerSender.replacetrack(prevTrack);
+	theResearcherSender.replaceTrack(prevTrack);
+}
+
+function onFront()
+{
+	theViewerSender.replacetrack(frontTrack);
+	theResearcherSender.replaceTrack(frontTrack);
+}
+
+function onBehind()
+{
+	theViewerSender.replacetrack(behindTrack);
+	theResearcherSender.replaceTrack(behindTrack);	
+}
+
+function onLeft()
+{
+	theViewerSender.replacetrack(leftTrack);
+	theResearcherSender.replaceTrack(leftTrack);
+}
+
+function onRight()
+{
+	theViewerSender.replacetrack(rightTrack);
+	theResearcherSender.replaceTrack(rightTrack);	
+}
+
+function onLeave(name)
+{
+	MyLog("Somebody left :( :" + name);
+	
+	if(name.includes("dude") || name === "dude")
+	{
+		keepCallingResearcher = true;
+	}
+	else
+	{
+		keepCallingViewer = true;
+	}
+}
 
 
 

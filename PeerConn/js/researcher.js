@@ -4,31 +4,38 @@ var name = "";
 var statusText = document.querySelector('#status');
 var primaryVid = document.querySelector('#primaryVid');
 var saveButton = document.querySelector('#saveButton');
+var loginButton = document.querySelector('#loginButton');
 
-var connectedUser, myConnection, theStream;
+var connectedUser, myStreamerConnection, myViewerConnection;
 
 var qtyReceivedTracks = 0;
 var receivedVideoTracks = [];
 var receivedAudioTrack;
+var receivedViewerAudioTrack;
 var currentPlayingVideo = 0;
 var ms;
 
 let mediaRecorder;
 let recordedBlobs;
 
+const proxy = new URLSearchParams(window.location.search);
+var viewerName = proxy.get('vid');
+var streamerName = proxy.get('sid');
+var researcherName = proxy.get('rid');
+
 function initPrimaryVideo()
 {
-	
-	
 	try{
+		
+		
 		console.log("Adding vidya");
 		ms.addTrack(receivedVideoTracks[0]);
 		console.log("Adding audya");
 		ms.addTrack(receivedAudioTrack);
 		console.log("Got thru the stuff");
 	
-		primaryVid.srcObject = ms;
-		primaryVid.play();
+		
+		
 	}
 	catch(e){
 		console.log(e);
@@ -136,6 +143,19 @@ function receiveVideo(e){
 	startRecording();
 }
 
+function receiveViewerAudio(e){
+	console.log(e);
+	
+	if(e.track.kind === "audio")
+	{
+		MyLog("Got a viewer audio");
+		receivedViewerAudioTrack = e.track;
+		ms.addTrack(receivedViewerAudioTrack);
+		
+		primaryVid.play();
+	}
+}
+
 
 //when a user logs in 
 async function onLogin(success) { 
@@ -158,27 +178,35 @@ async function onLogin(success) {
 			]
          }; 
 		 
-		myConnection = new RTCPeerConnection(configuration); 
-		
+		console.log("Loggin in now");
+		 
 		ms = new MediaStream();
+		primaryVid.srcObject = ms;
+		//primaryVid.play();
 		
-		myConnection.addEventListener("track", e => receiveVideo(e), false);
+		myStreamerConnection = new RTCPeerConnection(configuration); 
+		myViewerConnection = new RTCPeerConnection(configuration);
+		
+		myStreamerConnection.addEventListener("track", e => receiveVideo(e), false);
+		myViewerConnection.addEventListener("track", e => receiveViewerAudio(e), false);
 
          // Setup ice handling 
-         myConnection.onicecandidate = function (event) { 
+        myStreamerConnection.onicecandidate = function (event) { 
             if (event.candidate) { 
                send({ 
                   type: "candidate", 
                   candidate: event.candidate 
-               }); 
+               }, streamerName); 
             } 
-         };
-		 
-		//const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
-		//for(const track of audioStream.getTracks())
-		//{
-			//myConnection.addTrack(track);
-		//}
+        };
+		myViewerConnection.onicecandidate = function (event) { 
+            if (event.candidate) { 
+               send({ 
+                  type: "candidate", 
+                  candidate: event.candidate 
+               }, viewerName); 
+            } 
+        };
 		
    } 
 };
@@ -217,37 +245,51 @@ connection.onmessage = function (message) {
 connection.onopen = function () { 
    console.log("Connected to the signalling server"); 
    statusText.innerHTML = "Connected to the signalling server!";
-   DoResearcherLogin();
+   //DoResearcherLogin();
 };
 
 connection.onerror = function (err) { 
    console.log("Got error", err); 
 };
 
-// Alias for sending messages in JSON format 
-function send(message) { 
+loginButton.addEventListener("click", function () {
+	DoResearcherLogin();
+});
 
-   if (connectedUser) { 
-      message.name = connectedUser; 
+
+// Alias for sending messages in JSON format 
+function send(message, otherName) { 
+///////////this function needs to change, to know who we are messaging
+   if (otherName) { 
+      message.name = otherName; 
    } 
 	
    connection.send(JSON.stringify(message)); 
 };
 
 //when somebody wants to call us 
-function onOffer(offer, name) { 
+function onOffer(offer, name) 
+{ 
+	console.log("Got an offer");
    connectedUser = name; 
-   myConnection.setRemoteDescription(new RTCSessionDescription(offer));
-	
-   myConnection.createAnswer(function (answer) { 
-      myConnection.setLocalDescription(answer); 
+   
+   var usedConnection;
+   
+   if(connectedUser === streamerName)
+	   usedConnection = myStreamerConnection;
+   else
+	   usedConnection = myViewerConnection;
+   
+	usedConnection.setRemoteDescription(new RTCSessionDescription(offer));
+	usedConnection.createAnswer(function (answer) { 
+      usedConnection.setLocalDescription(answer); 
 		
       send({ 
          type: "answer", 
          answer: answer 
-      }); 
+      }, connectedUser); 
 		
-   }, function (error) { 
+   }, function (error) {
       alert("oops...error"); 
    }); 
    
@@ -255,29 +297,44 @@ function onOffer(offer, name) {
 }
 
 //when another user answers to our offer 
+/*
 function onAnswer(answer, name) { 
    myConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
    console.log("Got an Answer from " + name);
 }
+*/
 
 //when we got ice candidate from another user 
-function onCandidate(candidate, name) { 
-   myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-   console.log("Got an ICE Candidate from " + name);
+function onCandidate(candidate, name) {
+	if(otherName === streamerName)
+	{
+		myStreamerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	else
+	{
+		myViewerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
+	MyLog("Got an ICE Candidate from " + otherName);
 }
 
 function DoResearcherLogin()
-{
-	const proxy = new URLSearchParams(window.location.search);
-	name = proxy.get('rid');
-	
-   if(name.length > 0){ 
+{	
+   if(researcherName.length > 0){ 
       send({ 
          type: "login", 
-         name: name 
+         name: researcherName 
       }); 
    }
    
    console.log("Now waiting for video stream");
    statusText.innerHTML = "Connected to the signalling server, and waiting for a stream.  Please wait....";
+}
+
+
+function MyLog(message)
+{
+	console.log(message);
+	statusText.innerHTML += ("<br/>" + message);
 }
