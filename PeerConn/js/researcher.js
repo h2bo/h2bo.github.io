@@ -1,5 +1,4 @@
 var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com'); //NECESSARY.  This is my custom signal server
-var name = ""; 
 
 var statusText = document.querySelector('#status');
 var primaryVid = document.querySelector('#primaryVid');
@@ -148,11 +147,16 @@ function receiveViewerAudio(e){
 	
 	if(e.track.kind === "audio")
 	{
+		ms = new MediaStream();
 		MyLog("Got a viewer audio");
 		receivedViewerAudioTrack = e.track;
-		ms.addTrack(receivedViewerAudioTrack);
+		ms.addTrack(e.track);
 		
+		primaryVid.srcObject = ms;
 		primaryVid.play();
+		
+		MyLog(ms);
+		MyLog(e.track);
 	}
 }
 
@@ -276,9 +280,15 @@ function onOffer(offer, name)
    var usedConnection;
    
    if(connectedUser === streamerName)
+   {
 	   usedConnection = myStreamerConnection;
+	   console.log("Doop 1");
+   }
    else
+   {
 	   usedConnection = myViewerConnection;
+	   console.log("Doop 2");
+   }
    
 	usedConnection.setRemoteDescription(new RTCSessionDescription(offer));
 	usedConnection.createAnswer(function (answer) { 
@@ -306,7 +316,7 @@ function onAnswer(answer, name) {
 
 //when we got ice candidate from another user 
 function onCandidate(candidate, name) {
-	if(otherName === streamerName)
+	if(name === streamerName)
 	{
 		myStreamerConnection.addIceCandidate(new RTCIceCandidate(candidate));
 	}
@@ -316,7 +326,7 @@ function onCandidate(candidate, name) {
 	}
 	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
 	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
-	MyLog("Got an ICE Candidate from " + otherName);
+	MyLog("Got an ICE Candidate from " + name);
 }
 
 function DoResearcherLogin()
