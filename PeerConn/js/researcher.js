@@ -147,7 +147,6 @@ function receiveViewerAudio(e){
 	
 	if(e.track.kind === "audio")
 	{
-		ms = new MediaStream();
 		MyLog("Got a viewer audio");
 		receivedViewerAudioTrack = e.track;
 		ms.addTrack(e.track);
@@ -186,7 +185,7 @@ async function onLogin(success) {
 		 
 		ms = new MediaStream();
 		primaryVid.srcObject = ms;
-		//primaryVid.play();
+		primaryVid.play();
 		
 		myStreamerConnection = new RTCPeerConnection(configuration); 
 		myViewerConnection = new RTCPeerConnection(configuration);
@@ -319,10 +318,12 @@ function onCandidate(candidate, name) {
 	if(name === streamerName)
 	{
 		myStreamerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+		console.log("Streamer candidate");
 	}
 	else
 	{
 		myViewerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+		console.log("Viewer candidate");
 	}
 	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
 	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
