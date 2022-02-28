@@ -33,11 +33,12 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 	{			
 		if(device.kind === "audioinput")
 		{
+			if(device.deviceId.includes("comm"))
 			if(!gotAudio)
 			{
-				console.log("Potential audio: " + device.deviceId + " " + device.label);
+				MyLog("Potential audio: " + device.deviceId + " " + device.label);
 				myAudioDevice = device;
-				gotAudio = true;
+				//gotAudio = true;
 			}
 		}
 	});
