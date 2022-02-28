@@ -17,31 +17,14 @@ body{
 	margin: 0px;
 }
 
-#prevVideo
-{
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	
-}
-
-#nextVideo
-{
-	position: absolute;
-	right: 0px;
-	top: 0px;
-	
-}
-
 .navButton
 {
-	height: 100%;
-	background-color: red;
+	height: 15%;
+	width: 95%;
+	
 	background-repeat: no-repeat;
-	border: none;
+	border: 1px solid black;
 	z-index: 10;
-	padding-left: 20px;
-	padding-right: 20px;
 }
 
 .navButton:hover
@@ -54,3 +37,41 @@ body{
 	background-color: blue;
 }
 
+
+
+#buttonContainer
+{
+	height: 100%;
+	width: 10%;
+	float: left;
+	align-content: center;
+}
+
+#videoContainer
+{
+	height: 100%;
+	width: 90%;
+	float: right;
+}
+
+#recordReminder
+{
+	width: 100%;
+	height: 5%;
+}
+
+#buttonsAndVideo
+{
+	width: 100%;
+	height: 95%;
+}
+
+#reminderText
+{
+	color: red;
+	text-align: center;
+	font-size: 18px;
+	font-weight: bold;
+	position: relative;
+	top: 45%;
+}

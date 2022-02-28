@@ -3,8 +3,10 @@ var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com');
 
 //document selector for the status text.
 var statusText = document.querySelector('#status');
+var vidConfigPage = document.querySelector('#vidConfigPage');
+var streamingPage = document.querySelector('#streamingPage');
 
-var connectedUser;
+var controllerName;
 
 var name = "";
 
@@ -30,6 +32,7 @@ var leftTrack;
 var rightTrack;
 
 var gotAudio = false;
+var isMuted = false;
 
 	navigator.mediaDevices.enumerateDevices().then(function(devices) 
 	{
@@ -61,6 +64,117 @@ var gotAudio = false;
 			//console.log(device);
 		});
 	})
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+var startButton = document.querySelector('#startVideos');
+var vid0Options = document.querySelector('#vid0Options');
+var vid1Options = document.querySelector('#vid1Options');
+var vid2Options = document.querySelector('#vid2Options');
+var vid3Options = document.querySelector('#vid3Options');
+var saveButton = document.querySelector('#saveButton');
+var mySortedTracks = [];	
+	
+startButton.addEventListener("click", ShowCams);
+saveButton.addEventListener("click", SaveConfig);
+	
+async function ShowCams()
+{
+	for(var i = 0; i < myStreamingDevices.length; i++)
+	{
+		var selector = "#vid" + i;
+		console.log(selector);
+		var currVid = document.querySelector(selector);
+		
+		var gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}}).then(function(stream){
+			
+			currVid.srcObject = stream;
+			currVid.play();
+		});		
+	}
+}
+
+function SaveConfig()
+{
+	var a = vid0Options.value;
+	var b = vid1Options.value;
+	var c = vid2Options.value;
+	var d = vid3Options.value;
+	
+	if(a === b || a === c || a === d || b === c || b === d || c === d)
+	{
+		alert("Duplicate video mapping");
+		return;
+	}
+
+	mySortedTracks[a] = myStreamingDevices[0];
+	mySortedTracks[b] = myStreamingDevices[1];
+	mySortedTracks[c] = myStreamingDevices[2];
+	mySortedTracks[d] = myStreamingDevices[3];
+	
+	console.log("front: " + mySortedTracks[0]); //front
+	console.log("behind: " + mySortedTracks[1]); //behind
+	console.log("left: " + mySortedTracks[2]); //left
+	console.log("right: " + mySortedTracks[3]);	//right
+	
+	frontTrack = mySortedTracks[0];
+	behindTrack = mySortedTracks[1];
+	leftTrack = mySortedTracks[2];
+	rightTrack = mySortedTracks[3];
+	
+	document.querySelector('#vid0').srcObject = null;
+	document.querySelector('#vid1').srcObject = null;
+	document.querySelector('#vid2').srcObject = null;
+	document.querySelector('#vid3').srcObject = null;
+	
+	vidConfigPage.style.display = "none";
+	streamingPage.style.display = "inline";
+	
+	DoLogin();
+}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 
 /*
@@ -146,7 +260,7 @@ connection.onerror = function (err) {
   
 connection.onopen = function () { 
    MyLog("Connected to the signalling server!");
-   setTimeout(function(){DoLogin()}, 2000);
+   //setTimeout(function(){DoLogin()}, 2000); //used if we want to auto-login...
 };
 
 function DoLogin(){
@@ -231,6 +345,7 @@ async function onLogin(success) {
 		const proxy = new URLSearchParams(window.location.search);
 		viewerUser = proxy.get('vid');
 		researcherUser = proxy.get('rid');
+		controllerName = proxy.get('cid');
 		
 		MyLog(viewerUser + " is the viewer");
 		
@@ -302,29 +417,45 @@ async function onLogin(success) {
 	
 	
 	MyLog("<br/>Checkpoint 4");
-		
-
-	for(let i = 0; i < myStreamingDevices.length; i++)
-	{
-		var vidyaID = "video"+i;
-		 MyLog("Vidya id: " + vidyaID);
-	}
-	
-	MyLog("<br/>Checkpoint 4.2");
 	
 	MyLog("<br/>Quantity of devices: " + myStreamingDevices.length);
-	
-	
 	MyLog("Quantity of peer connections: " + myConnections.length);
+	
+	
+	try{
+		
+		MyLog("Collecting sorted tracks");
+		
+		const frontStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: mySortedTracks[0]}}});
+		frontTrack = frontStream.getTracks()[0];
+		
+		const behindStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: mySortedTracks[1]}}});
+		behindTrack = behindStream.getTracks()[0];
+		
+		const leftStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: mySortedTracks[2]}}});
+		leftTrack = leftStream.getTracks()[0];
+		
+		const rightStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: mySortedTracks[3]}}});
+		rightTrack = rightStream.getTracks()[0];
+		
+		MyLog("Sorted Track Collection Complete");
+	}
+	catch(e)
+	{
+		MyLog(e);
+	}
+	
+	
+	
+	
+	/*
+	
 	for(let i = 0; i < myStreamingDevices.length; i++)
 	{
 		try{
 		MyLog("Trying to setup vidya");
 		 //getting local video stream 
 		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
-		 
-		 var vidyaID = "video"+i;
-		 //document.querySelector('#'+vidyaID).srcObject = gumStream;
 		 
 		 MyLog("Here is a track");
 		 myStreamingTracks[i] = gumStream.getTracks()[0];
@@ -343,6 +474,7 @@ async function onLogin(success) {
 			MyLog(e);
 		}
 	}
+	*/
 	
 	MyLog("<br/>Checkpoint 5");
 	
@@ -352,9 +484,14 @@ async function onLogin(success) {
 		//awesomeConnection.addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	//}
 	
+	theViewerSender = myConnections[0].addTrack(behindTrack);
+	theResearcherSender = myConnections[1].addTrack(behindTrack);
+	
+	
+	/*
 	theViewerSender = myConnections[0].addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	theResearcherSender = myConnections[1].addTrack(myStreamingTracks[currentStreamingTrackNum]);
-	
+	*/
 	
 
 	//for(let awesomeConnection of myConnections)
@@ -378,13 +515,13 @@ function TryCall()
 	{
 		if(keepCallingViewer)
 		{
-			MyLog("Calling viewer....");
+			console.log("Calling viewer....");
 			DoOneViewerCall();
 		}
 		
 		if(keepCallingResearcher)
 		{
-			MyLog("Calling researcher.....");
+			console.log("Calling researcher.....");
 			DoOneResearcherCall();
 		}
 		
@@ -459,40 +596,65 @@ function onMute()
 	//need a way to stop streaming to both researcher and viewer... 
 	//perhaps replace track with null?
 	
-	prevTrack = myStreamingTracks[currentStreamingTrackNum];
+	MyLog("Received a Mute");
 	
 	theViewerSender.replaceTrack(null);
 	theResearcherSender.replaceTrack(null);
+	
+	isMuted = true;
 }
 
 function onResume()
 {
-	theViewerSender.replacetrack(prevTrack);
+	MyLog("Received a Resume");
+	theViewerSender.replaceTrack(prevTrack);
 	theResearcherSender.replaceTrack(prevTrack);
+	
+	isMuted = false;
 }
 
 function onFront()
 {
-	theViewerSender.replacetrack(frontTrack);
+	if(isMuted)
+		return;
+	
+	MyLog("Received a Front");
+	theViewerSender.replaceTrack(frontTrack);
 	theResearcherSender.replaceTrack(frontTrack);
+	prevTrack = frontTrack;
 }
 
 function onBehind()
 {
-	theViewerSender.replacetrack(behindTrack);
+	if(isMuted)
+		return;
+	
+	MyLog("Received a Behind");
+	theViewerSender.replaceTrack(behindTrack);
 	theResearcherSender.replaceTrack(behindTrack);	
+	prevTrack = behindTrack;
 }
 
 function onLeft()
 {
-	theViewerSender.replacetrack(leftTrack);
+	if(isMuted)
+		return;
+	
+	MyLog("Received a Left");
+	theViewerSender.replaceTrack(leftTrack);
 	theResearcherSender.replaceTrack(leftTrack);
+	prevTrack = leftTrack;
 }
 
 function onRight()
 {
-	theViewerSender.replacetrack(rightTrack);
+	if(isMuted)
+		return;
+	
+	MyLog("Received a Right");
+	theViewerSender.replaceTrack(rightTrack);
 	theResearcherSender.replaceTrack(rightTrack);	
+	prevTrack = rightTrack;
 }
 
 function onLeave(name)
@@ -503,7 +665,7 @@ function onLeave(name)
 	{
 		keepCallingResearcher = true;
 	}
-	else
+	else if (name.includes("scooby") || name === "scooby")
 	{
 		keepCallingViewer = true;
 	}

@@ -236,6 +236,21 @@ connection.onmessage = function (message) {
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
 			break; 
+			
+			
+		case "front":
+			console.log("Switch - Front - " + Date().toString());
+			break;
+		case "behind":
+			console.log("Switch - Behind - " + Date().toString());
+			break;	
+		case "left":
+			console.log("Switch - Left - " + Date().toString());
+			break;
+		case "right":
+			console.log("Switch - Right - " + Date().toString());
+			break;
+			
 		default: 
 			break; 
 		}

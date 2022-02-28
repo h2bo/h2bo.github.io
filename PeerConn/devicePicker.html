@@ -6,11 +6,64 @@
 	<body>
 		<p id="status">Attempting to connect....</p>
 		
-		<video id="theVid" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
-		<br/>
-		<select id="options">
+
+		<button id="startVideos">Start Videos</button>
+		<br/><br/>
 		
+		
+		<div style="display:flex">
+		
+		<div style="display:inline">
+		<video id="vid0" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+		<br/>
+		<select id="vid0Options">
+			<option value="0">Front</option>
+			<option value="1">Behind</option>
+			<option value="2">Left</option>
+			<option value="3">Right</option>
 		</select>
+		<br/>
+		</div>		
+		<div style="display:inline">
+		<video id="vid1" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+		<br/>
+		<select id="vid1Options">
+			<option value="0">Front</option>
+			<option value="1">Behind</option>
+			<option value="2">Left</option>
+			<option value="3">Right</option>
+		</select>
+		<br/>
+		</div>
+		
+		<div style="display:inline">
+		<video id="vid2" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+		<br/>
+		<select id="vid2Options">
+			<option value="0">Front</option>
+			<option value="1">Behind</option>
+			<option value="2">Left</option>
+			<option value="3">Right</option>
+		</select>
+		<br/>
+		</div>
+		
+		<div style="display:inline">
+		<video id="vid3" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+		<br/>
+		<select id="vid3Options">
+			<option value="0">Front</option>
+			<option value="1">Behind</option>
+			<option value="2">Left</option>
+			<option value="3">Right</option>
+		</select>
+		<br/>
+		</div>
+		
+		
+		</div>
+		
+		<button id="saveButton">Save Config</button>
 		
 		<script src = "js/DevicePicker.js"></script>
 		

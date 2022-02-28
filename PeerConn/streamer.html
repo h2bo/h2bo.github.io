@@ -5,34 +5,65 @@
 	
 	<body>
 	
-		<p id="status">Attempting to connect....</p>
-		
-		<video id="viewerAudio" autoplay style="width: 10px; height: 10px; border: 1px black solid"></video>
-	
-		<!--
-		<div id="loginPage">
-		    <div>
-				<input type="text" id="loginInput" />
-				<button id="loginBtn">Login</button>
+	<div id="vidConfigPage">
+		<button id="startVideos">Start Videos</button>
+		<br/><br/>
+		<div style="display:flex">
+			<div style="display:inline">
+				<video id="vid0" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+				<br/>
+				<select id="vid0Options">
+					<option value="0">Front</option>
+					<option value="1">Behind</option>
+					<option value="2">Left</option>
+					<option value="3">Right</option>
+				</select>
+				<br/>
+			</div>		
+			<div style="display:inline">
+				<video id="vid1" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+				<br/>
+				<select id="vid1Options">
+					<option value="0">Front</option>
+					<option value="1">Behind</option>
+					<option value="2">Left</option>
+					<option value="3">Right</option>
+				</select>
+				<br/>
+			</div>
+			<div style="display:inline">
+				<video id="vid2" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+				<br/>
+				<select id="vid2Options">
+					<option value="0">Front</option>
+					<option value="1">Behind</option>
+					<option value="2">Left</option>
+					<option value="3">Right</option>
+				</select>
+				<br/>
+			</div>
+			<div style="display:inline">
+				<video id="vid3" autoplay style="width: 300px; height: 250px; border: 1px black solid"></video>
+				<br/>
+				<select id="vid3Options">
+					<option value="0">Front</option>
+					<option value="1">Behind</option>
+					<option value="2">Left</option>
+					<option value="3">Right</option>
+				</select>
+				<br/>
 			</div>
 		</div>
 		
-		
-		<div id="callPage" style="display:none">
-			<p>Your login: <span id="userLogin" style="font-weight: bold"></span></p>
-			<input type="text" id="otherUsernameInput" />
-			<button id="connectToOtherUsernameBtn">Establish connection</button>
-		</div>
-		
-		<div id="videoPage" style="display: inline">
-			<p>Your video(s):</p>
-			<div id="videosContainer"></div>
-			<p>Their video(s):</p>
-			<div id="remoteVideosContainer"></div>
-		</div>
-		-->
-		
-		<script src = "js/streamer.js"></script>
+		<button id="saveButton">Save Config</button>
+	</div><!-- End VidConfig Page-->
+	
+	<div id="streamingPage">
+		<p id="status">Attempting to connect....</p>
+		<video id="viewerAudio" autoplay style="width: 10px; height: 10px; border: 1px black solid"></video>
+	</div>
+
+	<script src = "js/streamer.js"></script>
 		
 	</body>
 </html>

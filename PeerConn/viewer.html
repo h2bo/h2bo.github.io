@@ -10,11 +10,36 @@
 			<p id="status">Attempting to connect....</p>
 			<button id="loginButton" disabled>Log In</button>
 		</div>
-		<div id="videoPage">
-			<button id="prevVideo" class="navButton"> < </button>
-			<button id="nextVideo" class="navButton"> > </button>
-			<video id="primaryVid" autoplay></video>
+		
+		<div id="videoPage" style="display: none">
+		
+		
+			<div id="recordReminder">
+				<p id="reminderText">Reminder: this call is being recorded</p>
+			</div>
+		
+			<div id="buttonsAndVideo">
+				<div id="buttonContainer">
+					<button id="frontButton" class="navButton"> Front </button>
+					<br/>
+					<button id="behindButton" class="navButton"> Behind </button>
+					<br/>
+					<button id="leftButton" class="navButton"> Left </button>
+					<br/>
+					<button id="rightButton" class="navButton"> Right </button>
+					
+					<br/><br/>
+					<button id="takePicture" class="navButton"> Take Picture </button>
+				</div>
+			
+				<div id="videoContainer">
+					<video id="primaryVid" autoplay></video>
+				</div>
+			</div>
 		</div>
+		
+		<canvas id="picCanvas" width="1280" height="960" style="display: none"></canvas>
+		
       <script src="js/viewer.js"></script>
    </body>
 	

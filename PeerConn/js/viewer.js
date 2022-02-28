@@ -2,14 +2,18 @@ var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com'); //NE
 //var name = ""; 
 var streamerName = "";
 var researcherName = "";
- 
+
+var picCanvas = document.querySelector('#picCanvas');
+var takePictureButton = document.querySelector('#takePicture'); 
 var loginButton = document.querySelector('#loginButton'); 
 var videoPage = document.querySelector('#videoPage');
 var connectStatus = document.querySelector('#connectStatus');
 var statusText = document.querySelector('#status');
 var primaryVid = document.querySelector('#primaryVid');
-var prevVideo = document.querySelector('#prevVideo');
-var nextVideo = document.querySelector('#nextVideo');
+var frontButon = document.querySelector('#frontButton');
+var behindButton = document.querySelector('#behindButton');
+var leftButton = document.querySelector('#leftButton');
+var rightButton = document.querySelector('#rightButton');
 
 var connectedUser, myConnection, theStream;
 var myResearcherConnection;
@@ -46,49 +50,39 @@ var viewerName = proxy.get('vid');
 var streamerName = proxy.get('sid');
 var researcherName = proxy.get('rid');
 
-
 loginButton.addEventListener("click", function()
 {
 	DoViewerLogin();
 	loginButton.disabled = true;
+	
 });
 
-
-//TODO: instead of swapping through tracks,
-//need to tell the Streamer to swap tracks.
-nextVideo.addEventListener("click", function()
+frontButton.addEventListener("click", function()
 {
-	console.log("Next clicked");
-	send({ 
-		type: "goForward"
-	}, streamerName); 
-	/*
-	var allVidTracks = ms.getVideoTracks();	
-	ms.removeTrack(allVidTracks[0]);
-	
-	currentPlayingVideo++;
-	if(currentPlayingVideo >= qtyReceivedTracks)
-		currentPlayingVideo = 0;
-	
-	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
-	*/
+	console.log("Front clicked");
+	send({ type: "front"}, streamerName);
+	send({ type: "front"}, researcherName);
 });
 
-prevVideo.addEventListener("click", function()
+behindButton.addEventListener("click", function()
 {
-	console.log("Back clicked");
-	send({ type: "goBack"},streamerName);
-	
-	/*
-	var allVidTracks = ms.getVideoTracks();	
-	ms.removeTrack(allVidTracks[0]);
-	
-	currentPlayingVideo--;
-	if(currentPlayingVideo < 0)
-		currentPlayingVideo = (qtyReceivedTracks - 1);
-	
-	ms.addTrack(receivedVideoTracks[currentPlayingVideo]);
-	*/
+	console.log("Behind clicked");
+	send({ type: "behind"},streamerName);
+	send({ type: "behind"}, researcherName);
+});
+
+leftButton.addEventListener("click", function()
+{
+	console.log("Left clicked");
+	send({ type: "left"}, streamerName);
+	send({ type: "left"}, researcherName);
+});
+
+rightButton.addEventListener("click", function()
+{
+	console.log("Right clicked");
+	send({ type: "right"}, streamerName);
+	send({ type: "right"}, researcherName);
 });
 
 function initPrimaryVideo()
@@ -125,6 +119,9 @@ function receiveVideo(e){
 	
 	document.querySelector('#connectStatus').style= "display: none";
 	initPrimaryVideo();
+	
+	connectStatus.style.display = "none";
+	videoPage.style.display = "inline";
 }
 
 
@@ -187,7 +184,6 @@ async function onLogin(success) {
 			myResearcherConnection.addTrack(track);
 		}
 		
-		
 		TryCall();
    } 
 };
@@ -203,7 +199,7 @@ function TryCall()
 	{
 		if(keepCallingResearcher)
 		{
-			MyLog("Calling researcher.....");
+			console.log("Calling researcher.....");
 			DoOneResearcherCall();
 		}
 		
@@ -295,19 +291,21 @@ function onLeave()
 
   
 connection.onopen = function () { 
-   console.log("Connected to the signalling server"); 
-   statusText.innerHTML = "Connected to the signalling server!";
+   MyLog("Connected to the signalling server!");
    loginButton.disabled = false;
+   
+   
 };
 
 connection.onerror = function (err) { 
-   console.log("Got error", err); 
+   MyLog("Got error"); 
+   MyLog(err);
 };
 
 connection.onclose = function (e) {
-	console.log("CLOSED");
-	console.log(e);
-	console.log("CLOSED COMPLETE");
+	MyLog("CLOSED");
+	MyLog(e);
+	MyLog("CLOSED COMPLETE");
 };
 
 // Alias for sending messages in JSON format 
@@ -377,37 +375,42 @@ function DoViewerLogin()
       }); 
    }
    
-   console.log("Now waiting for video stream");
-   statusText.innerHTML = "Connected to the signalling server, and waiting for a stream.  Please wait....";
+   MyLog("Now waiting for video stream");
+   MyLog("Connected to the signalling server, and waiting for a stream.  Please wait....");
 }
 
-/*
-//setup a peer connection with another user 
-connectToOtherUsernameBtn.addEventListener("click", function () {
-  
-	console.log("The call button was clicked");
-	callPage.style.display = "none";
-	videoPage.style.display = "inline";
+
+
+
+takePicture.addEventListener("click", TakeAPicture);
+
+function TakeAPicture()
+{
+	console.log("Taking a picture");
 	
-   var otherUsername = otherUsernameInput.value;
-   connectedUser = otherUsername;
+	var ctx = picCanvas.getContext('2d');
+	ctx.drawImage(primaryVid, 0, 0, picCanvas.width, picCanvas.height);
 	
-   if (otherUsername.length > 0) { 
-      //make an offer 
-      myConnection.createOffer(function (offer) { 
-			
-         send({ 
-            type: "offer", 
-            offer: offer 
-         }); 
-			
-         myConnection.setLocalDescription(offer);
-      }, function (error) { 
-         alert("An error has occurred."); 
-      }); 
-   } 
-});
-*/
+	picCanvas.toBlob(function(blob){
+		
+		
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.style.display = 'none';
+		a.href = url;
+		a.download = 'bruh.png';
+		document.body.appendChild(a);
+		a.click();
+		
+	}, 'image/png', 1);
+}
+
+
+
+
+
+
+
 
 
 function MyLog(message)
