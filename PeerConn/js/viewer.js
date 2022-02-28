@@ -89,14 +89,13 @@ rightButton.addEventListener("click", function()
 
 function initPrimaryVideo()
 {
-	ms = new MediaStream();
+	
 	
 	try{
 		ms.addTrack(receivedVideoTracks[0]);
 		ms.addTrack(receivedAudioTrack);
 	
-		primaryVid.srcObject = ms;
-		primaryVid.play();
+		
 	}
 	catch(e){
 		console.log(e);
@@ -108,7 +107,11 @@ function initPrimaryVideo()
 
 function receiveVideo(e){
 	console.log(e);
+	ms.addTrack(e.track);
 	
+	
+	
+	/*
 	if(e.track.kind === "audio")
 	{
 		receivedAudioTrack = e.track;
@@ -118,9 +121,11 @@ function receiveVideo(e){
 		receivedVideoTracks[qtyReceivedTracks] = e.track;
 		qtyReceivedTracks++;
 	}
+	*/
 	
-	document.querySelector('#connectStatus').style= "display: none";
-	initPrimaryVideo();
+	
+	primaryVid.srcObject = ms;
+	primaryVid.play();
 	
 	connectStatus.style.display = "none";
 	videoPage.style.display = "inline";
@@ -153,6 +158,8 @@ async function onLogin(success) {
 				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
 			]
          }; 
+		 
+		ms = new MediaStream();
 		 
 		myConnection = new RTCPeerConnection(configuration); 
 		myResearcherConnection = new RTCPeerConnection(configuration);
