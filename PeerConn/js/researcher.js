@@ -22,24 +22,7 @@ var viewerName = proxy.get('vid');
 var streamerName = proxy.get('sid');
 var researcherName = proxy.get('rid');
 
-function initPrimaryVideo()
-{
-	try{
-		
-		
-		console.log("Adding vidya");
-		ms.addTrack(receivedVideoTracks[0]);
-		console.log("Adding audya");
-		ms.addTrack(receivedAudioTrack);
-		console.log("Got thru the stuff");
-	
-		
-		
-	}
-	catch(e){
-		console.log(e);
-	}
-}
+
 
 
 
@@ -121,12 +104,27 @@ function saveVideoNow()
 
 
 
+function initPrimaryVideo()
+{
+	try{
+		console.log("Adding vidya");
+		ms.addTrack(receivedVideoTracks[0]);
+		console.log("Adding audya");
+		ms.addTrack(receivedAudioTrack);
+		console.log("Got thru the stuff");
+	}
+	catch(e){
+		console.log(e);
+	}
+}
 
 
 
-function receiveVideo(e){
-	console.log(e);
+
+function receiveVideo(e){	
 	
+	
+	/*
 	if(e.track.kind === "audio")
 	{
 		receivedAudioTrack = e.track;
@@ -136,9 +134,15 @@ function receiveVideo(e){
 		receivedVideoTracks[qtyReceivedTracks] = e.track;
 		qtyReceivedTracks++;
 	}
+	*/
+	
+	
+	MyLog("Adding track:");
+	MyLog(e.track);
+	ms.addTrack(e.track);
 	
 	document.querySelector('#connectStatus').style= "display: none";
-	initPrimaryVideo();
+	//initPrimaryVideo();
 	startRecording();
 }
 
@@ -151,8 +155,8 @@ function receiveViewerAudio(e){
 		receivedViewerAudioTrack = e.track;
 		ms.addTrack(e.track);
 		
-		primaryVid.srcObject = ms;
-		primaryVid.play();
+		//primaryVid.srcObject = ms;
+		//primaryVid.play();
 		
 		MyLog(ms);
 		MyLog(e.track);
@@ -179,7 +183,7 @@ async function onLogin(success) {
 				{'urls': 'stun:stun4.l.google.com:19302'},
 				{'urls': 'turn:3.13.58.4:3478?transport=tcp', username: "dude", credential: "dude"}
 			]
-         }; 
+         };
 		 
 		console.log("Loggin in now");
 		 
