@@ -124,8 +124,11 @@ function receiveVideo(e){
 	*/
 	
 	
-	primaryVid.srcObject = ms;
-	primaryVid.play();
+	MyLog(e.track.kind);
+	
+	
+	if(e.track.kind === "video")
+		primaryVid.play();
 	
 	connectStatus.style.display = "none";
 	videoPage.style.display = "inline";
@@ -160,6 +163,7 @@ async function onLogin(success) {
          }; 
 		 
 		ms = new MediaStream();
+		primaryVid.srcObject = ms;
 		 
 		myConnection = new RTCPeerConnection(configuration); 
 		myResearcherConnection = new RTCPeerConnection(configuration);
