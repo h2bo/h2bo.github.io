@@ -35,6 +35,16 @@ body{
 	z-index: 10;
 }
 
+#startButton
+{
+	position: absolute;
+	bottom: 0px;
+	right: 200px;
+	padding: 20px;
+	z-index: 10;
+	
+}
+
 
 .navButton
 {

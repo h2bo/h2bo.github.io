@@ -4,6 +4,9 @@ var statusText = document.querySelector('#status');
 var primaryVid = document.querySelector('#primaryVid');
 var saveButton = document.querySelector('#saveButton');
 var loginButton = document.querySelector('#loginButton');
+var startButton = document.querySelector('#startButton');
+
+startButton.disabled = true;
 
 var connectedUser, myStreamerConnection, myViewerConnection;
 
@@ -22,6 +25,10 @@ var viewerName = proxy.get('vid');
 var streamerName = proxy.get('sid');
 var researcherName = proxy.get('rid');
 
+
+var isRecording = false;
+
+var allReceivedTracks = [];
 
 
 
@@ -68,13 +75,26 @@ function handleDataAvailable(event) {
 
 
 
-stopButton.addEventListener("click", e=> stopRecording(), false);
+stopButton.addEventListener("click", e => stopRecording(), false);
 
 function stopRecording()
 {
 	console.log("Stopped recording");
-	
 	mediaRecorder.stop();
+}
+
+startButton.addEventListener("click", DoStartRecord, false);
+function DoStartRecord()
+{
+	console.log("Recording Begin!");
+	
+	if(!isRecording)
+	{
+		startRecording();
+		isRecording = true;
+	}
+	
+	startButton.disabled = true;
 }
 
 
@@ -104,26 +124,17 @@ function saveVideoNow()
 
 
 
-function initPrimaryVideo()
-{
-	try{
-		console.log("Adding vidya");
-		ms.addTrack(receivedVideoTracks[0]);
-		console.log("Adding audya");
-		ms.addTrack(receivedAudioTrack);
-		console.log("Got thru the stuff");
-	}
-	catch(e){
-		console.log(e);
-	}
-}
+
+
+
+var audioMix;
+var audioDest;
+
 
 
 
 
 function receiveVideo(e){	
-	
-	
 	/*
 	if(e.track.kind === "audio")
 	{
@@ -135,15 +146,16 @@ function receiveVideo(e){
 		qtyReceivedTracks++;
 	}
 	*/
-	
-	
 	MyLog("Adding track:");
 	MyLog(e.track);
-	ms.addTrack(e.track);
+	//ms.addTrack(e.track);
+	allReceivedTracks.push(e.track);
 	
-	document.querySelector('#connectStatus').style= "display: none";
-	//initPrimaryVideo();
-	startRecording();
+	ms = new MediaStream(allReceivedTracks);
+	primaryVid.srcObject = ms;
+	
+	document.querySelector('#connectStatus').style = "display: none";
+	startButton.disabled = false;
 }
 
 function receiveViewerAudio(e){
@@ -153,13 +165,18 @@ function receiveViewerAudio(e){
 	{
 		MyLog("Got a viewer audio");
 		receivedViewerAudioTrack = e.track;
-		ms.addTrack(e.track);
+		//ms.addTrack(e.track);
+		
+		allReceivedTracks.push(e.track);
+		ms = new MediaStream(allReceivedTracks);
+		primaryVid.srcObject = ms;
 		
 		//primaryVid.srcObject = ms;
 		//primaryVid.play();
 		
 		MyLog(ms);
 		MyLog(e.track);
+		startButton.disabled = false;
 	}
 }
 
@@ -187,6 +204,10 @@ async function onLogin(success) {
 		 
 		console.log("Loggin in now");
 		 
+		audioMix = new AudioContext();
+		audioDest = audioMix.createMediaStreamDestination();
+		
+		
 		ms = new MediaStream();
 		primaryVid.srcObject = ms;
 		primaryVid.play();
