@@ -123,62 +123,108 @@ function saveVideoNow()
 
 
 
+var allMediaStreams = [];
+var theVideoTrack;
 
 
+function basicAdd(track)
+{
+	MyLog("Trying to basic add this:");
+	MyLog(track);
+	
+	if(track.kind === "audio")
+	{
+		var newMediaStream = new MediaStream();
+		newMediaStream.addTrack(track);
+		allMediaStreams.push(newMediaStream);
+	}
+	else
+	{
+		theVideoTrack = track;
+	}
+	
+	if(theVideoTrack && (allMediaStreams.length == 2))
+	{
+		completeStream();
+	}	
+}
 
-
-var audioMix;
-var audioDest;
-
-
+function completeStream()
+{
+	MyLog("ayyy we got everything");
+	var audioCtx = new AudioContext();
+	
+	var mediaStreamSource1 = audioCtx.createMediaStreamSource(allMediaStreams[0]);
+	var mediaStreamSource2 = audioCtx.createMediaStreamSource(allMediaStreams[1]);
+	
+	var destination = audioCtx.createMediaStreamDestination();
+	mediaStreamSource1.connect(destination);
+	mediaStreamSource2.connect(destination);
+	destination.stream.addTrack(theVideoTrack);
+	
+	ms = destination.stream;
+	
+	primaryVid.srcObject = ms;
+	primaryVid.play();
+}
 
 
 
 function receiveVideo(e){	
-	/*
-	if(e.track.kind === "audio")
-	{
-		receivedAudioTrack = e.track;
-	}
-	else
-	{
-		receivedVideoTracks[qtyReceivedTracks] = e.track;
-		qtyReceivedTracks++;
-	}
-	*/
-	MyLog("Adding track:");
-	MyLog(e.track);
-	//ms.addTrack(e.track);
-	allReceivedTracks.push(e.track);
-	
-	ms = new MediaStream(allReceivedTracks);
-	primaryVid.srcObject = ms;
-	
+	basicAdd(e.track);	
 	document.querySelector('#connectStatus').style = "display: none";
 	startButton.disabled = false;
 }
 
 function receiveViewerAudio(e){
-	console.log(e);
-	
-	if(e.track.kind === "audio")
-	{
-		MyLog("Got a viewer audio");
-		receivedViewerAudioTrack = e.track;
-		//ms.addTrack(e.track);
-		
-		allReceivedTracks.push(e.track);
-		ms = new MediaStream(allReceivedTracks);
-		primaryVid.srcObject = ms;
-		
-		//primaryVid.srcObject = ms;
-		//primaryVid.play();
-		
-		MyLog(ms);
-		MyLog(e.track);
-		startButton.disabled = false;
-	}
+	basicAdd(e.track);
+	startButton.disabled = false;
+	MyLog("Got a viewer Audio");
 }
+
+
+
+function createMergedStream(tracks)
+{
+    const audioContext = new AudioContext();
+
+    var audioSources = [];
+    var videoTracks = [];
+	
+	for(var i = 0; i < tracks.length; i++)
+	{
+		MyLog("Iterating");
+		if(tracks[i].kind === "video")
+			videoTracks.push(tracks[i]);
+		else
+		{
+			MyLog("I is: " + i);
+			MyLog(tracks[i]);
+			var newTrack = audioContext.createMediaStreamTrackSource(tracks[i]);
+			audioSources.push(newTrack);
+		}
+	}
+
+    const destination = audioContext["createMediaStreamDestination"]();
+    audioSources.forEach((audioSource) => {
+        audioSource.connect(destination);
+    })
+
+    videoTracks.forEach((track) => {
+        destination.stream.addTrack(track);
+    })
+
+    return destination.stream;
+}
+
+
+
+
+
+
+
+
+
 
 
 //when a user logs in 
