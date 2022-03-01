@@ -21,6 +21,8 @@ var deviceCounter = 0;
 var myAudioDevice;
 var theViewerSender;
 var theViewerAudioSender;
+var theResearcherSender;
+var theResearcherAudioSender;
 
 var prevTrack;
 
@@ -162,13 +164,58 @@ function SaveConfig()
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+/*
+function TryUSB()
+{
+	
+		
+	navigator.usb.requestDevice({filters:[]}).then(function(device){
+		console.log(device);
+	});
+	
+	
+	navigator.usb.getDevices().then(devices =>
+{
+	MyLog("Button pressed");
+	try
+	{
+	MyLog("Trying to get USB devices");
+	MyLog(devices.length);
+	devices.forEach(device => 
+	{
+		MyLog("USB Thing: " + device.productName + " " + device.serialNumber);
+	})
+	}
+	catch(e)
+	{
+		MyLog(e);
+	}
+})
+	
+}
+*/
 
 
 
 
 var myConnections = [];
 var viewerUser;
+var researcherUser;
 var keepCallingViewer = true;
+var keepCallingResearcher = true;
 
 
 function onAnswer(answer, otherName) { 
@@ -179,7 +226,15 @@ function onAnswer(answer, otherName) {
 		myConnections[0].setRemoteDescription(new RTCSessionDescription(answer));
 		keepCallingViewer = false;
 	}
+	else
+	{
+		MyLog("Researcher?");
+		myConnections[1].setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingResearcher = false;
+	}
 
+	//myConnections[otherName].setRemoteDescription(new RTCSessionDescription(answer));
+	//myConnection.setRemoteDescription(new RTCSessionDescription(answer));
 	MyLog("Got an Answer from " + otherName);
 	
 }
@@ -190,7 +245,12 @@ function onCandidate(candidate, otherName) {
 	{
 		myConnections[0].addIceCandidate(new RTCIceCandidate(candidate));
 	}
-
+	else
+	{
+		myConnections[1].addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
 	MyLog("Got an ICE Candidate from " + otherName);
 }
 
@@ -235,14 +295,12 @@ connection.onmessage = function (message) {
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
 			break;
-		/*
 		case "goBack":
 			onGoBack();
 			break;
 		case "goForward":
 			onGoForward();
 			break;
-		*/
 		case "mute":
 			onMute();
 			break;
@@ -286,6 +344,7 @@ async function onLogin(success) {
 		MyLog("logging in now");
 		const proxy = new URLSearchParams(window.location.search);
 		viewerUser = proxy.get('vid');
+		researcherUser = proxy.get('rid');
 		controllerName = proxy.get('cid');
 		
 		MyLog(viewerUser + " is the viewer");
@@ -303,8 +362,13 @@ async function onLogin(success) {
 			]
 		};
 		
+		
+		//myConnection = new RTCPeerConnection(configuration);
+		//myConnection.addEventListener("track", e => receiveAudio(e), false);
 		myConnections[0] = new RTCPeerConnection(configuration);
 		myConnections[0].addEventListener("track", e=> receiveAudio(e), false);
+		myConnections[1] = new RTCPeerConnection(configuration);
+		//do not need researcher audio, so skip
 		
 		MyLog("<br/>Checkpoint 2");
 		myConnections[0].onicecandidate = function(event){
@@ -316,21 +380,42 @@ async function onLogin(success) {
 				viewerUser);
 			}
 		};
-
+		myConnections[1].onicecandidate = function(event){
+			if(event.candidate){
+				send({
+					type: "candidate",
+					candidate: event.candidate
+				},
+				researcherUser);
+			}
+		};		
+        /*
+         myConnection.onicecandidate = function (event) { 
+            if (event.candidate) { 
+               send({
+                  type: "candidate", 
+                  candidate: event.candidate
+               });
+            } 
+         }; 
+		*/
 		
 		MyLog("<br/>Checkpoint 3");
 		
 		MyLog("Dude 1");
-		
 	const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
 	MyLog("Dude 2");
 	MyLog(audioStream);
 	
 	var theAudioTrack = audioStream.getTracks()[0];
 	
+	
+	
 	MyLog("Adding audio to the connections now");
 	theViewerAudioSender = myConnections[0].addTrack(theAudioTrack);
-		
+	theResearcherAudioSender = myConnections[1].addTrack(theAudioTrack);
+	
+	
 	MyLog("<br/>Checkpoint 4");
 	
 	MyLog("<br/>Quantity of devices: " + myStreamingDevices.length);
@@ -361,6 +446,36 @@ async function onLogin(success) {
 	}
 	
 	
+	
+	
+	/*
+	
+	for(let i = 0; i < myStreamingDevices.length; i++)
+	{
+		try{
+		MyLog("Trying to setup vidya");
+		 //getting local video stream 
+		 const gumStream = await navigator.mediaDevices.getUserMedia({ video: {deviceId: {exact: myStreamingDevices[i]}}});
+		 
+		 MyLog("Here is a track");
+		 myStreamingTracks[i] = gumStream.getTracks()[0];
+		 
+		 MyLog("Track is: " + myStreamingTracks[i].label);
+		 
+		 //for(const track of gumStream.getTracks())
+		 //{
+			 
+			 //myConnection.addTrack(track);
+			 
+		 //}
+		}
+		catch(e)
+		{
+			MyLog(e);
+		}
+	}
+	*/
+	
 	MyLog("<br/>Checkpoint 5");
 	
 	//for(let awesomeConnection of myConnections)
@@ -369,7 +484,8 @@ async function onLogin(success) {
 		//awesomeConnection.addTrack(myStreamingTracks[currentStreamingTrackNum]);
 	//}
 	
-	theViewerSender = myConnections[0].addTrack(frontTrack);
+	theViewerSender = myConnections[0].addTrack(behindTrack);
+	theResearcherSender = myConnections[1].addTrack(behindTrack);
 	
 	
 	/*
@@ -402,7 +518,12 @@ function TryCall()
 			console.log("Calling viewer....");
 			DoOneViewerCall();
 		}
-
+		
+		if(keepCallingResearcher)
+		{
+			console.log("Calling researcher.....");
+			DoOneResearcherCall();
+		}
 		
 		TryCall();
 		
@@ -410,6 +531,20 @@ function TryCall()
 	
 }
 
+function DoOneResearcherCall()
+{
+	//myConnection.createOffer(function (offer) {
+	myConnections[1].createOffer(function (offer) {
+		send({
+			type: "offer",
+			offer: offer
+		}, researcherUser);
+		
+	myConnections[1].setLocalDescription(offer);
+	//myConnection.setLocalDescription(offer); 
+	
+	}, function (error) {alert("An error has occurred.");});
+}
 
 function DoOneViewerCall()
 {
@@ -435,8 +570,6 @@ function receiveAudio(e)
 	document.querySelector('#viewerAudio').play();
 }
 
-
-/*
 function onGoBack()
 {
 	currentStreamingTrackNum--;
@@ -456,7 +589,6 @@ function onGoForward()
 	theViewerSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
 	theResearcherSender.replaceTrack(myStreamingTracks[currentStreamingTrackNum]);
 }
-*/
 
 
 function onMute()
@@ -467,6 +599,7 @@ function onMute()
 	MyLog("Received a Mute");
 	
 	theViewerSender.replaceTrack(null);
+	theResearcherSender.replaceTrack(null);
 	
 	isMuted = true;
 }
@@ -475,6 +608,7 @@ function onResume()
 {
 	MyLog("Received a Resume");
 	theViewerSender.replaceTrack(prevTrack);
+	theResearcherSender.replaceTrack(prevTrack);
 	
 	isMuted = false;
 }
@@ -486,6 +620,7 @@ function onFront()
 	
 	MyLog("Received a Front");
 	theViewerSender.replaceTrack(frontTrack);
+	theResearcherSender.replaceTrack(frontTrack);
 	prevTrack = frontTrack;
 }
 
@@ -496,6 +631,7 @@ function onBehind()
 	
 	MyLog("Received a Behind");
 	theViewerSender.replaceTrack(behindTrack);
+	theResearcherSender.replaceTrack(behindTrack);	
 	prevTrack = behindTrack;
 }
 
@@ -506,6 +642,7 @@ function onLeft()
 	
 	MyLog("Received a Left");
 	theViewerSender.replaceTrack(leftTrack);
+	theResearcherSender.replaceTrack(leftTrack);
 	prevTrack = leftTrack;
 }
 
@@ -516,6 +653,7 @@ function onRight()
 	
 	MyLog("Received a Right");
 	theViewerSender.replaceTrack(rightTrack);
+	theResearcherSender.replaceTrack(rightTrack);	
 	prevTrack = rightTrack;
 }
 
@@ -523,7 +661,11 @@ function onLeave(name)
 {
 	MyLog("Somebody left :( :" + name);
 	
-	if (name.includes("scooby") || name === "scooby")
+	if(name.includes("dude") || name === "dude")
+	{
+		keepCallingResearcher = true;
+	}
+	else if (name.includes("scooby") || name === "scooby")
 	{
 		keepCallingViewer = true;
 	}
@@ -542,6 +684,57 @@ function send(message, otherName) {
 	
    connection.send(JSON.stringify(message)); 
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//when somebody wants to call us 
+//does this get fired in my implementation?
+//i do not think i need this - the Streamer is doing the calling, always
+/*
+function onOffer(offer, name) { 
+   connectedUser = name; 
+   myConnection.setRemoteDescription(new RTCSessionDescription(offer));
+	
+   myConnection.createAnswer(function (answer) { 
+      myConnection.setLocalDescription(answer); 
+		
+      send({ 
+         type: "answer", 
+         answer: answer 
+      }); 
+		
+   }, function (error) { 
+      alert("oops...error"); 
+   }); 
+   
+   console.log("Got an Offer from " + name);
+}
+*/
+
 
 function MyLog(message)
 {

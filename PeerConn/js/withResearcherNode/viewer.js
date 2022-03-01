@@ -16,6 +16,7 @@ var leftButton = document.querySelector('#leftButton');
 var rightButton = document.querySelector('#rightButton');
 
 var connectedUser, myConnection, theStream;
+var myResearcherConnection;
 
 var qtyReceivedTracks = 0;
 var receivedVideoTracks = [];
@@ -33,10 +34,12 @@ navigator.mediaDevices.enumerateDevices().then(function(devices)
 		if(device.kind === "audioinput")
 		{
 			MyLog("Potential audio: ID: " + device.deviceId + " Label:" + device.label);
-			if(device.deviceId.includes("comm"))
+			//if(device.deviceId.includes("comm"))
 			if(!gotAudio)
 			{
+				
 				myAudioDevice = device;
+				//gotAudio = true;
 			}
 		}
 	});
@@ -53,31 +56,51 @@ loginButton.addEventListener("click", function()
 {
 	DoViewerLogin();
 	loginButton.disabled = true;
+	
 });
 
 frontButton.addEventListener("click", function()
 {
-	console.log("Front clicked " + Date().toString());
+	console.log("Front clicked");
 	send({ type: "front"}, streamerName);
+	send({ type: "front"}, researcherName);
 });
 
 behindButton.addEventListener("click", function()
 {
-	console.log("Behind clicked " + Date().toString());
+	console.log("Behind clicked");
 	send({ type: "behind"},streamerName);
+	send({ type: "behind"}, researcherName);
 });
 
 leftButton.addEventListener("click", function()
 {
-	console.log("Left clicked " + Date().toString());
+	console.log("Left clicked");
 	send({ type: "left"}, streamerName);
+	send({ type: "left"}, researcherName);
 });
 
 rightButton.addEventListener("click", function()
 {
-	console.log("Right clicked " + Date().toString());
+	console.log("Right clicked");
 	send({ type: "right"}, streamerName);
+	send({ type: "right"}, researcherName);
 });
+
+function initPrimaryVideo()
+{
+	
+	
+	try{
+		ms.addTrack(receivedVideoTracks[0]);
+		ms.addTrack(receivedAudioTrack);
+	
+		
+	}
+	catch(e){
+		console.log(e);
+	}
+}
 
 
 
@@ -85,7 +108,24 @@ rightButton.addEventListener("click", function()
 function receiveVideo(e){
 	console.log(e);
 	ms.addTrack(e.track);
+	
+	
+	
+	/*
+	if(e.track.kind === "audio")
+	{
+		receivedAudioTrack = e.track;
+	}
+	else
+	{
+		receivedVideoTracks[qtyReceivedTracks] = e.track;
+		qtyReceivedTracks++;
+	}
+	*/
+	
+	
 	MyLog(e.track.kind);
+	
 	
 	if(e.track.kind === "video")
 		primaryVid.play();
@@ -126,6 +166,7 @@ async function onLogin(success) {
 		primaryVid.srcObject = ms;
 		 
 		myConnection = new RTCPeerConnection(configuration); 
+		myResearcherConnection = new RTCPeerConnection(configuration);
 		
 		myConnection.addEventListener("track", e => receiveVideo(e), false);
 		//myConnection.ontrack = (e) => receiveVideo(e);
@@ -140,13 +181,79 @@ async function onLogin(success) {
             } 
          };
 		 
+        myResearcherConnection.onicecandidate = function (event) { 
+            if (event.candidate) { 
+               send({ 
+                  type: "candidate", 
+                  candidate: event.candidate 
+               }, researcherName); 
+            } 
+         };
+		 
 		const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
 		for(const track of audioStream.getTracks())
 		{
 			myConnection.addTrack(track);
+			myResearcherConnection.addTrack(track);
 		}
+		
+		TryCall();
    } 
 };
+
+
+
+var keepCallingResearcher = true;
+
+//continual Call until pickup
+function TryCall()
+{
+	setTimeout(function()
+	{
+		if(keepCallingResearcher)
+		{
+			console.log("Calling researcher.....");
+			DoOneResearcherCall();
+		}
+		
+		TryCall();
+		
+	}, 2000);
+}
+
+
+function DoOneResearcherCall()
+{
+	//myConnection.createOffer(function (offer) {
+	myResearcherConnection.createOffer(function (offer) {
+		send({
+			type: "offer",
+			offer: offer
+		}, researcherName);
+		
+	myResearcherConnection.setLocalDescription(offer);
+	//myConnection.setLocalDescription(offer); 
+	
+	}, function (error) {alert("An error has occurred.");});
+}
+
+
+
+function onAnswer(answer, otherName) { 
+
+	MyLog(otherName + " " + researcherName);
+	if(otherName === researcherName)
+	{
+		MyLog("Giggity");
+		myResearcherConnection.setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingResearcher = false;
+	}
+	
+	MyLog("Got an Answer from " + otherName);
+	
+}
+
+
 
 
 
@@ -175,6 +282,10 @@ connection.onmessage = function (message) {
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
 			break; 
+			
+		case "leave":
+			onLeave();
+			break;
 		default: 
 			break; 
 		}
@@ -185,10 +296,18 @@ connection.onmessage = function (message) {
 };  
 
 
+function onLeave()
+{
+	console.log("Somebody left!!");
+}
+
+
   
 connection.onopen = function () { 
    MyLog("Connected to the signalling server!");
    loginButton.disabled = false;
+   
+   
 };
 
 connection.onerror = function (err) { 
@@ -233,14 +352,26 @@ function onOffer(offer, name)
    console.log("Got an Offer from " + name);
 }
 
+//when another user answers to our offer 
+//function onAnswer(answer, name) { 
+   //myResearcherConnection.setRemoteDescription(new RTCSessionDescription(answer)); 
+   //console.log("Got an Answer from " + name);
+//}
 
 //when we got ice candidate from another user 
 function onCandidate(candidate, name) {
+	
+
 	if(otherName === streamerName)
 	{
 		myConnection.addIceCandidate(new RTCIceCandidate(candidate));
 	}
-
+	else
+	{
+		myResearcherConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
 	MyLog("Got an ICE Candidate from " + otherName);
 }
 
@@ -248,6 +379,8 @@ function onCandidate(candidate, name) {
 
 function DoViewerLogin()
 {
+
+	
    if(viewerName.length > 0){ 
       send({ 
          type: "login", 

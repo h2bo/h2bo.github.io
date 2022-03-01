@@ -1,46 +1,13 @@
 var connection = new WebSocket('wss://obscure-sierra-55073.herokuapp.com'); //NECESSARY.  This is my custom signal server
-//var name = ""; 
-var streamerName = "";
-var researcherName = "";
 
-var picCanvas = document.querySelector('#picCanvas');
-var takePictureButton = document.querySelector('#takePicture'); 
 var loginButton = document.querySelector('#loginButton'); 
 var videoPage = document.querySelector('#videoPage');
 var connectStatus = document.querySelector('#connectStatus');
 var statusText = document.querySelector('#status');
-var primaryVid = document.querySelector('#primaryVid');
-var frontButon = document.querySelector('#frontButton');
-var behindButton = document.querySelector('#behindButton');
-var leftButton = document.querySelector('#leftButton');
-var rightButton = document.querySelector('#rightButton');
+var pauseButton = document.querySelector('#pauseButton');
+var resumeButton = document.querySelector('#resumeButton');
 
-var connectedUser, myConnection, theStream;
-
-var qtyReceivedTracks = 0;
-var receivedVideoTracks = [];
-var receivedAudioTrack;
-var currentPlayingVideo = 0;
-var ms = new MediaStream;
-var myAudioDevice;
-
-var gotAudio = false;
-//get the viewer's mic, so they can chat with the streamer
-navigator.mediaDevices.enumerateDevices().then(function(devices) 
-{
-	devices.forEach(function(device) 
-	{			
-		if(device.kind === "audioinput")
-		{
-			MyLog("Potential audio: ID: " + device.deviceId + " Label:" + device.label);
-			if(device.deviceId.includes("comm"))
-			if(!gotAudio)
-			{
-				myAudioDevice = device;
-			}
-		}
-	});
-})
+var connectedUser, myConnection;
 
 
 const proxy = new URLSearchParams(window.location.search);
@@ -48,53 +15,29 @@ const proxy = new URLSearchParams(window.location.search);
 var viewerName = proxy.get('vid');
 var streamerName = proxy.get('sid');
 var researcherName = proxy.get('rid');
+var controllerName = proxy.get('cid');
+
 
 loginButton.addEventListener("click", function()
 {
-	DoViewerLogin();
+	DoControllerLogin();
 	loginButton.disabled = true;
-});
-
-frontButton.addEventListener("click", function()
-{
-	console.log("Front clicked " + Date().toString());
-	send({ type: "front"}, streamerName);
-});
-
-behindButton.addEventListener("click", function()
-{
-	console.log("Behind clicked " + Date().toString());
-	send({ type: "behind"},streamerName);
-});
-
-leftButton.addEventListener("click", function()
-{
-	console.log("Left clicked " + Date().toString());
-	send({ type: "left"}, streamerName);
-});
-
-rightButton.addEventListener("click", function()
-{
-	console.log("Right clicked " + Date().toString());
-	send({ type: "right"}, streamerName);
-});
-
-
-
-
-function receiveVideo(e){
-	console.log(e);
-	ms.addTrack(e.track);
-	MyLog(e.track.kind);
 	
-	if(e.track.kind === "video")
-		primaryVid.play();
-	
-	connectStatus.style.display = "none";
-	videoPage.style.display = "inline";
-}
+});
 
+pauseButton.addEventListener("click", function()
+{
+	console.log("Pause clicked");
+	send({ type: "mute"}, streamerName);
+	send({ type: "mute"}, researcherName);
+});
 
+resumeButton.addEventListener("click", function()
+{
+	console.log("Resume clicked");
+	send({ type: "resume"}, streamerName);
+	send({ type: "resume"}, researcherName);
+});
 
 
 
@@ -110,6 +53,13 @@ async function onLogin(success) {
    
    else 
    { 
+
+		connectStatus.style.display = "none";
+		videoPage.style.display = "inline";
+
+
+
+		/*
          //using Google public stun server 
          var configuration = { 
             "iceServers": 
@@ -122,13 +72,9 @@ async function onLogin(success) {
 			]
          }; 
 		 
-		ms = new MediaStream();
-		primaryVid.srcObject = ms;
-		 
 		myConnection = new RTCPeerConnection(configuration); 
 		
-		myConnection.addEventListener("track", e => receiveVideo(e), false);
-		//myConnection.ontrack = (e) => receiveVideo(e);
+		myConnection.addEventListener("track", e => function(e){console.log("Received."), false);
 
          // Setup ice handling 
         myConnection.onicecandidate = function (event) { 
@@ -139,14 +85,27 @@ async function onLogin(success) {
                }, streamerName); 
             } 
          };
-		 
-		const audioStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: myAudioDevice.deviceId}}});
-		for(const track of audioStream.getTracks())
-		{
-			myConnection.addTrack(track);
-		}
+		*/
    } 
 };
+
+
+
+function onAnswer(answer, otherName) { 
+
+	MyLog(otherName + " " + researcherName);
+	if(otherName === researcherName)
+	{
+		MyLog("Giggity");
+		myResearcherConnection.setRemoteDescription(new RTCSessionDescription(answer));
+		keepCallingResearcher = false;
+	}
+	
+	MyLog("Got an Answer from " + otherName);
+	
+}
+
+
 
 
 
@@ -175,6 +134,10 @@ connection.onmessage = function (message) {
 		case "candidate": 
 			onCandidate(data.candidate, data.name); 
 			break; 
+			
+		case "leave":
+			onLeave();
+			break;
 		default: 
 			break; 
 		}
@@ -183,6 +146,12 @@ connection.onmessage = function (message) {
 	   //console.log("Got something not JSON");
    };
 };  
+
+
+function onLeave()
+{
+	console.log("Somebody left!!");
+}
 
 
   
@@ -233,59 +202,38 @@ function onOffer(offer, name)
    console.log("Got an Offer from " + name);
 }
 
-
 //when we got ice candidate from another user 
 function onCandidate(candidate, name) {
+	
+
 	if(otherName === streamerName)
 	{
 		myConnection.addIceCandidate(new RTCIceCandidate(candidate));
 	}
-
+	else
+	{
+		myResearcherConnection.addIceCandidate(new RTCIceCandidate(candidate));
+	}
+	//myConnections[otherName].addIceCandidate(new RTCIceCandidate(candidate));
+	//myConnection.addIceCandidate(new RTCIceCandidate(candidate)); 
 	MyLog("Got an ICE Candidate from " + otherName);
 }
 
 
 
-function DoViewerLogin()
+function DoControllerLogin()
 {
-   if(viewerName.length > 0){ 
+
+	
+   if(controllerName.length > 0){ 
       send({ 
          type: "login", 
-         name: viewerName 
+         name: controllerName 
       }); 
    }
    
-   MyLog("Now waiting for video stream");
-   MyLog("Connected to the signalling server, and waiting for a stream.  Please wait....");
+   MyLog("Logged In.");
 }
-
-
-
-
-takePicture.addEventListener("click", TakeAPicture);
-
-function TakeAPicture()
-{
-	console.log("Taking a picture");
-	
-	var ctx = picCanvas.getContext('2d');
-	ctx.drawImage(primaryVid, 0, 0, picCanvas.width, picCanvas.height);
-	
-	picCanvas.toBlob(function(blob){
-		
-		
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.style.display = 'none';
-		a.href = url;
-		a.download = 'bruh.png';
-		document.body.appendChild(a);
-		a.click();
-		
-	}, 'image/png', 1);
-}
-
-
 
 
 
